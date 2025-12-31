@@ -142,13 +142,13 @@ export const ChatSanctuary: React.FC<ChatSanctuaryProps> = ({ messages, onSendMe
         </div>
       </div>
 
-      {/* Action Zone - Solid Dark Background */}
-      <div className="absolute bottom-0 left-0 right-0 p-3 md:p-6 bg-gradient-to-t from-[#05070a] via-[#05070a]/95 to-transparent pt-20 pointer-events-none z-20">
+      {/* Action Zone - More Solid and Always Visible */}
+      <div className="absolute bottom-0 left-0 right-0 p-3 md:p-6 bg-gradient-to-t from-[#05070a] via-[#05070a]/98 to-transparent pt-20 pointer-events-none z-20">
         <form 
           onSubmit={handleSubmit} 
-          className="relative max-w-3xl mx-auto group pointer-events-auto transition-all duration-300"
+          className="relative max-w-3xl mx-auto group pointer-events-auto transition-all duration-300 opacity-100"
         >
-          <div className="absolute -inset-1 bg-gradient-to-r from-violet-600/10 to-indigo-600/10 rounded-[22px] blur-sm opacity-0 group-focus-within:opacity-100 transition duration-500"></div>
+          <div className="absolute -inset-1 bg-gradient-to-r from-violet-600/20 to-indigo-600/20 rounded-[22px] blur-sm opacity-0 group-focus-within:opacity-100 transition duration-500"></div>
           <div className="relative">
             <textarea
               rows={1}
@@ -162,7 +162,7 @@ export const ChatSanctuary: React.FC<ChatSanctuaryProps> = ({ messages, onSendMe
               }}
               dir={isArabicText(input) ? 'rtl' : 'ltr'}
               placeholder={placeholders[language]}
-              className="w-full bg-[#0d1326] border border-white/15 rounded-[20px] py-4 px-6 focus:outline-none focus:border-violet-500/50 text-white placeholder-white/20 text-sm md:text-lg font-bold resize-none shadow-2xl pr-14 md:pr-16"
+              className="w-full bg-[#0d1326] border border-white/20 rounded-[20px] py-4 px-6 focus:outline-none focus:border-violet-500 text-white placeholder-white/20 text-sm md:text-lg font-bold resize-none shadow-2xl pr-14 md:pr-16"
               disabled={isProcessing}
             />
             <button 
