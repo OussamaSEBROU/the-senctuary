@@ -20,6 +20,8 @@ const App: React.FC = () => {
 
   const [activeView, setActiveView] = useState<ViewMode>('chat');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isInitialAnalysis, setIsInitialAnalysis] = useState(false);
+  const [showAxiomsOverlay, setShowAxiomsOverlay] = useState(false);
 
   useEffect(() => {
     return () => {
@@ -39,10 +41,13 @@ const App: React.FC = () => {
       axiomsHeader: "Axiomatic Insights",
       activeDoc: "Active Manuscript",
       uploadPrompt: "Upload manuscript",
-      synthesizing: "Analyzing thematic structures...",
+      synthesizing: "Neural Synthesis in Progress...",
       ready: "Sanctuary Ready",
       processing: "Processing...",
-      openInNewTab: "View Full Screen"
+      openInNewTab: "View Full Screen",
+      waitQuote: "Decoding the axiomatic structures of the manuscript...",
+      covenant: "The Sanctuary Covenant: Direct reading and personal comprehension are the only paths to wisdom.",
+      startChat: "Enter the Sanctuary"
     },
     ar: {
       newResearch: "بحث جديد",
@@ -53,10 +58,13 @@ const App: React.FC = () => {
       axiomsHeader: "الرؤى البديهية",
       activeDoc: "المخطوطة النشطة",
       uploadPrompt: "رفع المخطوطة",
-      synthesizing: "تحليل الهياكل الموضوعية...",
+      synthesizing: "جاري التوليف العصبي...",
       ready: "الملاذ جاهز",
       processing: "معالجة...",
-      openInNewTab: "فتح المخطوطة في نافذة جديدة"
+      openInNewTab: "فتح المخطوطة في نافذة جديدة",
+      waitQuote: "فك شيفرة الهياكل البديهية للمخطوطة...",
+      covenant: "عهد الملاذ: القراءة المباشرة والفهم الشخصي هما المساران الوحيدان للحكمة الحقيقية.",
+      startChat: "دخول الملاذ"
     }
   }), []);
 
@@ -77,6 +85,7 @@ const App: React.FC = () => {
       pdfUrl: blobUrl,
       axioms: []
     }));
+    setIsInitialAnalysis(true);
 
     try {
       const reader = new FileReader();
@@ -92,21 +101,28 @@ const App: React.FC = () => {
             isProcessing: false, 
             status: t.ready 
           }));
+          setIsInitialAnalysis(false);
+          setShowAxiomsOverlay(true);
           setActiveView('chat');
         } catch (error) {
           console.error(error);
           setState(prev => ({ ...prev, isProcessing: false, status: 'Error' }));
+          setIsInitialAnalysis(false);
         }
       };
       reader.readAsDataURL(file);
     } catch (error) {
       console.error(error);
       setState(prev => ({ ...prev, isProcessing: false, status: 'Failed' }));
+      setIsInitialAnalysis(false);
     }
   };
 
   const handleSendMessage = async (text: string) => {
     if (!state.pdfBase64) return;
+    
+    // إخفاء غطاء البديهيات عند بدء الشات
+    if (showAxiomsOverlay) setShowAxiomsOverlay(false);
 
     const userMsg: Message = { role: 'user', text };
     const initialHistory = [...state.chatHistory, userMsg];
@@ -148,13 +164,63 @@ const App: React.FC = () => {
 
   return (
     <div className={`flex h-screen bg-[#05070a] text-slate-200 overflow-hidden ${isRtl ? 'flex-row-reverse' : ''}`}>
+      
+      {/* 1. Synthesis & Covenant Overlay */}
+      {isInitialAnalysis && (
+        <div className="fixed inset-0 z-[100] bg-[#05070a] flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-500">
+          <div className="absolute inset-0 bg-grid opacity-10"></div>
+          <div className="relative mb-12">
+            <div className="w-24 h-24 md:w-32 md:h-32 rounded-full border-t-2 border-violet-500 animate-spin"></div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-16 h-16 md:w-20 md:h-20 bg-violet-600/10 rounded-full animate-pulse blur-2xl"></div>
+            </div>
+          </div>
+          <h2 className="text-xl md:text-3xl font-black glow-text-violet uppercase tracking-tighter mb-4 italic">
+            {t.synthesizing}
+          </h2>
+          <div className="max-w-md mx-auto space-y-4">
+            <p className="text-[10px] md:text-xs font-black text-white/20 uppercase tracking-[0.3em]">
+              {t.waitQuote}
+            </p>
+            <div className="h-[1px] w-12 bg-white/10 mx-auto"></div>
+            <p className="text-sm md:text-lg font-bold text-violet-400/60 italic leading-relaxed px-4">
+              "{t.covenant}"
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* 2. Full Screen Axioms Result Overlay */}
+      {showAxiomsOverlay && (
+        <div className="fixed inset-0 z-[90] bg-[#05070a]/95 backdrop-blur-3xl flex flex-col items-center justify-center p-4 md:p-12 animate-in zoom-in-95 duration-700">
+           <div className="max-w-7xl w-full flex flex-col items-center">
+              <span className="text-[10px] md:text-[12px] font-black uppercase tracking-[0.5em] text-violet-500/60 mb-2">Synthesized Wisdom</span>
+              <h2 className="text-2xl md:text-5xl font-black text-white mb-8 md:mb-16 tracking-tighter text-center uppercase italic">
+                {t.axiomsHeader}
+              </h2>
+              
+              <div className="w-full mb-12 md:mb-20">
+                <AxiomCards axioms={state.axioms} variant="fullscreen" />
+              </div>
+
+              <button 
+                onClick={() => setShowAxiomsOverlay(false)}
+                className="group relative px-8 py-4 bg-white text-black rounded-full font-black uppercase tracking-widest text-xs transition-all hover:scale-110 active:scale-95 shadow-2xl"
+              >
+                <span className="relative z-10">{t.startChat}</span>
+                <div className="absolute inset-0 bg-violet-500 rounded-full blur-xl opacity-0 group-hover:opacity-40 transition-opacity"></div>
+              </button>
+           </div>
+        </div>
+      )}
+
       {/* Mobile Sidebar Overlay */}
       <div 
         className={`fixed inset-0 bg-black/80 z-40 transition-opacity duration-500 lg:hidden ${sidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
         onClick={() => setSidebarOpen(false)}
       />
 
-      {/* Responsive Sidebar */}
+      {/* Sidebar */}
       <aside className={`
         fixed lg:static top-0 bottom-0 ${isRtl ? 'right-0' : 'left-0'} z-50
         w-[80vw] md:w-80 transition-transform duration-500 ease-in-out border-r border-white/5 
@@ -268,17 +334,6 @@ const App: React.FC = () => {
             <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
               {activeView === 'chat' && (
                 <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
-                  {state.axioms.length > 0 && (
-                    <div className="shrink-0 max-h-[30vh] overflow-y-auto p-3 md:p-6 custom-scrollbar bg-white/[0.01] border-b border-white/5">
-                      <div className="max-w-7xl mx-auto">
-                        <div className={`flex items-center gap-4 mb-3 md:mb-4 ${isRtl ? 'flex-row-reverse' : ''}`}>
-                           <h3 className="text-[9px] font-black uppercase tracking-[0.4em] text-white/20">{t.axiomsHeader}</h3>
-                           <div className="flex-1 h-[1px] bg-white/5"></div>
-                        </div>
-                        <AxiomCards axioms={state.axioms} />
-                      </div>
-                    </div>
-                  )}
                   <div className="flex-1 min-h-0 relative">
                     <ChatSanctuary 
                       messages={state.chatHistory} 
