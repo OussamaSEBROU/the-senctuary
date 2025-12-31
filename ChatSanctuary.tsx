@@ -90,11 +90,7 @@ export const ChatSanctuary: React.FC<ChatSanctuaryProps> = ({ messages, onSendMe
     ar: "تواصل مع العمق الفكري..."
   };
 
-  const covenant = {
-    en: "Direct reading and personal comprehension are the only paths to wisdom.",
-    ar: "القراءة المباشرة والفهم الشخصي هما المساران الوحيدان للحكمة الحقيقية."
-  };
-
+  // تعديل الشفافية لتكون مرئية أكثر (0.4 بدلاً من 0.1)
   const visibilityClass = isGhostMode 
     ? "opacity-40 md:opacity-50 hover:opacity-100 transition-opacity duration-700 ease-out" 
     : "opacity-100 transition-opacity duration-300 ease-in";
@@ -106,17 +102,6 @@ export const ChatSanctuary: React.FC<ChatSanctuaryProps> = ({ messages, onSendMe
         className={`flex-1 overflow-y-auto px-4 md:px-8 pt-6 pb-28 space-y-8 custom-scrollbar scroll-smooth ${visibilityClass}`}
       >
         <div className="max-w-4xl mx-auto w-full">
-          {messages.length === 0 && (
-            <div className="animate-in fade-in slide-in-from-bottom duration-1000 py-6">
-               <div className="glass bg-violet-600/5 p-6 rounded-[24px] border border-violet-500/10 flex flex-col items-center text-center">
-                 <ShieldCheck className="text-violet-500/30 mb-3" size={32} />
-                 <p className={`text-xs md:text-sm font-bold text-white/30 italic leading-relaxed max-w-md ${language === 'ar' ? 'text-right' : 'text-left'}`} dir={language === 'ar' ? 'rtl' : 'ltr'}>
-                   {covenant[language]}
-                 </p>
-               </div>
-            </div>
-          )}
-
           {messages.map((msg, idx) => {
             const isModel = msg.role === 'model';
             const isAr = isArabicText(msg.text);
@@ -171,12 +156,13 @@ export const ChatSanctuary: React.FC<ChatSanctuaryProps> = ({ messages, onSendMe
         </div>
       </div>
 
-      <div className="absolute bottom-0 left-0 right-0 p-3 md:p-6 bg-gradient-to-t from-[#05070a] via-[#05070a]/90 to-transparent pt-20 pointer-events-none z-20">
+      {/* Action Zone - تم رفع مستوى العتمة (Opaqueness) */}
+      <div className="absolute bottom-0 left-0 right-0 p-3 md:p-6 bg-gradient-to-t from-[#05070a] via-[#05070a]/95 to-transparent pt-20 pointer-events-none z-20">
         <form 
           onSubmit={handleSubmit} 
-          className="relative max-w-3xl mx-auto group pointer-events-auto transition-all duration-700 opacity-60 hover:opacity-100 focus-within:opacity-100"
+          className="relative max-w-3xl mx-auto group pointer-events-auto transition-all duration-700 opacity-85 hover:opacity-100 focus-within:opacity-100"
         >
-          <div className="absolute -inset-1 bg-gradient-to-r from-violet-600/10 to-indigo-600/10 rounded-[22px] blur-sm opacity-0 group-focus-within:opacity-100 transition duration-500"></div>
+          <div className="absolute -inset-1 bg-gradient-to-r from-violet-600/15 to-indigo-600/15 rounded-[22px] blur-sm opacity-0 group-focus-within:opacity-100 transition duration-500"></div>
           <div className="relative">
             <textarea
               rows={1}
@@ -190,7 +176,7 @@ export const ChatSanctuary: React.FC<ChatSanctuaryProps> = ({ messages, onSendMe
               }}
               dir={isArabicText(input) ? 'rtl' : 'ltr'}
               placeholder={placeholders[language]}
-              className="w-full bg-[#0d1326]/90 backdrop-blur-3xl border border-white/10 rounded-[20px] py-3.5 md:py-4 px-5 md:px-7 focus:outline-none focus:border-violet-500/30 text-white placeholder-white/20 text-sm md:text-lg font-bold resize-none shadow-2xl pr-14 md:pr-16"
+              className="w-full bg-[#0d1326] border border-white/10 rounded-[20px] py-3.5 md:py-4 px-5 md:px-7 focus:outline-none focus:border-violet-500/30 text-white placeholder-white/20 text-sm md:text-lg font-bold resize-none shadow-2xl pr-14 md:pr-16"
               disabled={isProcessing}
             />
             <button 
