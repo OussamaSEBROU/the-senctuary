@@ -213,23 +213,23 @@ const App: React.FC = () => {
         </div>
       )}
 
-      {/* Sidebar Overlay */}
+      {/* Sidebar Overlay - Always visible for both desktop/mobile when open */}
       <div 
-        className={`fixed inset-0 bg-black/80 z-40 transition-opacity duration-500 lg:hidden ${sidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+        className={`fixed inset-0 bg-black/80 z-40 transition-opacity duration-500 ${sidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
         onClick={() => setSidebarOpen(false)}
       />
 
-      {/* Sidebar */}
+      {/* Sidebar - Now hidden by default on all screens until toggled */}
       <aside className={`
-        fixed lg:static top-0 bottom-0 ${isRtl ? 'right-0' : 'left-0'} z-50
+        fixed top-0 bottom-0 ${isRtl ? 'right-0' : 'left-0'} z-50
         w-[85vw] md:w-80 transition-transform duration-500 ease-in-out border-r border-white/5 
         bg-[#05070a] shadow-2xl flex flex-col overflow-hidden
-        ${sidebarOpen ? 'translate-x-0' : (isRtl ? 'translate-x-full' : '-translate-x-full lg:translate-x-0')}
+        ${sidebarOpen ? 'translate-x-0' : (isRtl ? 'translate-x-full' : '-translate-x-full')}
       `}>
         <div className="p-4 md:p-6 flex flex-col h-full">
           <div className="flex items-center justify-between mb-8">
             <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20">Knowledge Repository</span>
-            <button onClick={() => setSidebarOpen(false)} className="p-2 bg-white/5 rounded-full lg:hidden">
+            <button onClick={() => setSidebarOpen(false)} className="p-2 bg-white/5 rounded-full">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
             </button>
           </div>
@@ -273,10 +273,11 @@ const App: React.FC = () => {
 
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col relative min-w-0 bg-[#05070a]">
+        {/* Header - Sidebar button always visible */}
         <header className="h-16 md:h-20 flex items-center justify-between px-4 md:px-8 z-30 shrink-0 border-b border-white/5 bg-[#05070a]/80 backdrop-blur-xl">
           <button 
             onClick={() => setSidebarOpen(true)}
-            className="p-2.5 bg-white text-black hover:scale-105 rounded-xl transition-all shadow-pro lg:hidden"
+            className="p-2.5 bg-white text-black hover:scale-110 rounded-xl transition-all shadow-pro flex items-center justify-center"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
           </button>
