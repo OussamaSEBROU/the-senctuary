@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
@@ -6,7 +5,7 @@ import rehypeKatex from 'rehype-katex';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { atomDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { Copy, Check, Terminal, ShieldCheck } from 'lucide-react';
-import { Message } from '../types';
+import { Message } from './types';
 
 interface ChatSanctuaryProps {
   messages: Message[];
@@ -30,27 +29,17 @@ const CodeBlock = ({ language, value }: { language: string; value: string }) => 
   };
 
   return (
-    <div className="relative my-8 group rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
-      <div className="flex items-center justify-between px-6 py-3 bg-black/80 border-b border-white/10 text-[10px] uppercase font-black tracking-widest text-white/40">
-        <div className="flex items-center gap-2">
-          <Terminal size={14} className="text-violet-400" />
-          <span>{language || 'code'}</span>
-        </div>
-        <button onClick={handleCopy} className="hover:text-white transition-colors flex items-center gap-1">
-          {copied ? <Check size={12} className="text-green-400" /> : <Copy size={12} />}
+    <div className="relative my-4 group rounded-xl overflow-hidden border border-white/10">
+      <div className="flex items-center justify-between px-4 py-2 bg-black/80 border-b border-white/10 text-[9px] uppercase font-black tracking-widest text-white/40">
+        <span>{language || 'code'}</span>
+        <button onClick={handleCopy} className="hover:text-white transition-colors">
           {copied ? 'Copied' : 'Copy'}
         </button>
       </div>
       <SyntaxHighlighter
         language={language || 'text'}
         style={atomDark}
-        customStyle={{
-          margin: 0,
-          background: '#000000',
-          padding: '2rem',
-          fontSize: '0.95rem',
-          lineHeight: '1.7',
-        }}
+        customStyle={{ margin: 0, background: '#000000', padding: '1rem', fontSize: '0.85rem' }}
       >
         {value}
       </SyntaxHighlighter>
@@ -60,16 +49,22 @@ const CodeBlock = ({ language, value }: { language: string; value: string }) => 
 
 export const ChatSanctuary: React.FC<ChatSanctuaryProps> = ({ messages, onSendMessage, isProcessing, language }) => {
   const [input, setInput] = useState('');
-  const [showNote, setShowNote] = useState(true);
+  const [isGhostMode, setIsGhostMode] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const endRef = useRef<HTMLDivElement>(null);
 
+  // Transition to ghost mode after the first exchange
+  useEffect(() => {
+    if (messages.length > 1) {
+      setIsGhostMode(true);
+    } else {
+      setIsGhostMode(false);
+    }
+  }, [messages.length]);
+
   useEffect(() => {
     if (endRef.current) {
-      endRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
-    }
-    if (messages.length > 0) {
-      setShowNote(false);
+      endRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages, isProcessing]);
 
@@ -81,44 +76,26 @@ export const ChatSanctuary: React.FC<ChatSanctuaryProps> = ({ messages, onSendMe
     }
   };
 
-  const placeholders = {
-    en: "Engage with the axiomatic depth...",
-    ar: "تواصل مع العمق البديهي..."
-  };
-
-  const covenant = {
-    en: "The Sanctuary Covenant: This engine is an intellectual facilitator, not a substitute. Direct reading and personal comprehension are the only paths to true wisdom.",
-    ar: "عهد الملاذ: هذه الأداة هي ميسر فكري وليست بديلاً. القراءة المباشرة والفهم الشخصي هما المساران الوحيدان للحكمة الحقيقية."
-  };
+  const placeholders = { en: "Engage deep wisdom...", ar: "تواصل مع الحكمة..." };
+  const visibilityClass = isGhostMode 
+    ? "opacity-10 md:opacity-20 hover:opacity-100 transition-opacity duration-1000" 
+    : "opacity-100 transition-opacity duration-500";
 
   return (
     <div className="flex flex-col h-full w-full relative">
-      {/* Expanded Messages Area with Transparency Fade */}
       <div 
         ref={scrollRef} 
-        className="flex-1 overflow-y-auto px-6 pt-12 pb-20 space-y-16 custom-scrollbar scroll-smooth transition-opacity duration-700 opacity-30 hover:opacity-100"
+        className={`flex-1 overflow-y-auto px-4 md:px-6 pt-10 pb-32 space-y-10 custom-scrollbar scroll-smooth ${visibilityClass}`}
       >
-        <div className="max-w-6xl mx-auto w-full">
-          {showNote && messages.length === 0 && (
-            <div className="animate-in fade-in slide-in-from-top duration-700 mb-16">
-              <div className="glass border-violet-500/20 bg-violet-600/5 p-10 rounded-[40px] relative group overflow-hidden shadow-pro">
-                <div className="absolute top-0 right-0 p-6">
-                   <button onClick={() => setShowNote(false)} className="text-white/20 hover:text-white transition-colors">
-                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-                   </button>
-                </div>
-                <div className="flex gap-8 items-start">
-                  <div className="w-14 h-14 rounded-2xl bg-violet-600/20 flex items-center justify-center shrink-0 border border-violet-500/30">
-                    <ShieldCheck className="text-violet-400" size={32} />
-                  </div>
-                  <div>
-                    <h4 className="text-xs font-black uppercase tracking-[0.5em] text-violet-400/60 mb-4">Sanctuary Protocol</h4>
-                    <p className={`text-xl font-bold leading-relaxed text-white/60 italic ${isArabicText(covenant[language]) ? 'text-right' : 'text-left'}`} dir={isArabicText(covenant[language]) ? 'rtl' : 'ltr'}>
-                      {covenant[language]}
-                    </p>
-                  </div>
-                </div>
-              </div>
+        <div className="max-w-4xl mx-auto w-full">
+          {messages.length === 0 && (
+            <div className="animate-in fade-in slide-in-from-bottom duration-1000">
+               <div className="glass bg-violet-600/5 p-8 rounded-[30px] border border-violet-500/10 flex flex-col items-center text-center">
+                 <ShieldCheck className="text-violet-500/40 mb-4" size={40} />
+                 <p className="text-sm md:text-lg font-bold text-white/40 italic leading-relaxed max-w-lg">
+                   {language === 'ar' ? 'عهد الملاذ: القراءة المباشرة والفهم الشخصي هما المساران الوحيدان للحكمة الحقيقية.' : 'The Sanctuary Covenant: Direct reading and personal comprehension are the only paths to wisdom.'}
+                 </p>
+               </div>
             </div>
           )}
 
@@ -129,17 +106,17 @@ export const ChatSanctuary: React.FC<ChatSanctuaryProps> = ({ messages, onSendMe
             return (
               <div 
                 key={idx} 
-                className={`flex w-full ${isModel ? 'justify-start' : 'justify-end'} animate-in fade-in duration-500 mb-12`}
+                className={`flex w-full ${isModel ? 'justify-start' : 'justify-end'} animate-in fade-in duration-500 mb-8`}
               >
-                <div className={`flex gap-8 max-w-full w-full ${isModel ? 'flex-row' : 'flex-row-reverse'}`}>
-                  <div className={`w-12 h-12 rounded-2xl flex-shrink-0 flex items-center justify-center text-[10px] font-black border border-white/5 shadow-pro select-none ${
+                <div className={`flex gap-3 md:gap-6 max-w-[95%] md:max-w-full ${isModel ? 'flex-row' : 'flex-row-reverse'}`}>
+                  <div className={`w-8 h-8 md:w-10 md:h-10 rounded-xl flex-shrink-0 flex items-center justify-center text-[8px] font-black border border-white/5 ${
                     !isModel ? 'bg-violet-600 text-white' : 'bg-white/5 text-violet-400'
                   }`}>
-                    {!isModel ? 'USR' : 'K-AI'}
+                    {isModel ? 'K-AI' : 'USR'}
                   </div>
 
-                  <div className={`flex-1 py-1 px-2 ${isModel ? 'border-l-2 border-white/5' : ''}`}>
-                    <div className={`prose prose-invert max-w-none ${isAr ? 'text-right font-bold text-2xl leading-[1.8]' : 'text-left font-medium text-xl leading-relaxed'}`} dir={isAr ? 'rtl' : 'ltr'}>
+                  <div className={`flex-1 min-w-0 ${isModel ? 'border-l border-white/5 pl-4 md:pl-6' : ''}`}>
+                    <div className={`prose prose-invert max-w-none ${isAr ? 'text-right font-bold text-lg md:text-xl' : 'text-left font-medium text-base md:text-lg'}`} dir={isAr ? 'rtl' : 'ltr'}>
                       <ReactMarkdown
                         remarkPlugins={[remarkMath]}
                         rehypePlugins={[rehypeKatex]}
@@ -149,22 +126,21 @@ export const ChatSanctuary: React.FC<ChatSanctuaryProps> = ({ messages, onSendMe
                             return !inline && match ? (
                               <CodeBlock language={match[1]} value={String(children).replace(/\n$/, '')} />
                             ) : (
-                              <code className={`${className} bg-black/40 px-3 py-1 rounded-lg text-blue-300 font-mono text-[0.9em]`} {...props}>
+                              <code className="bg-white/5 px-2 py-0.5 rounded text-violet-300 font-mono text-[0.85em]" {...props}>
                                 {children}
                               </code>
                             );
                           },
-                          h1: ({children}) => <h1 className="text-4xl font-black mb-8 mt-12">{children}</h1>,
-                          h2: ({children}) => <h2 className="text-3xl font-black mb-6 mt-10">{children}</h2>,
-                          h3: ({children}) => <h3 className="text-2xl font-black mb-4 mt-8">{children}</h3>,
+                          h1: ({children}) => <h1 className="text-2xl font-black mb-4">{children}</h1>,
+                          h2: ({children}) => <h2 className="text-xl font-black mb-3">{children}</h2>,
                         }}
                       >
                         {msg.text}
                       </ReactMarkdown>
                       {isProcessing && idx === messages.length - 1 && !msg.text && (
-                        <div className="flex gap-2 items-center mt-4">
-                          <span className="w-2 h-6 bg-violet-400 animate-pulse"></span>
-                          <span className="text-xs font-black text-violet-400/40 uppercase tracking-widest">Synthesizing Thought...</span>
+                        <div className="flex gap-1.5 items-center mt-3">
+                          <span className="w-1.5 h-4 bg-violet-500 animate-pulse"></span>
+                          <span className="text-[9px] font-black text-violet-500/40 uppercase tracking-widest">Synthesizing...</span>
                         </div>
                       )}
                     </div>
@@ -177,13 +153,13 @@ export const ChatSanctuary: React.FC<ChatSanctuaryProps> = ({ messages, onSendMe
         </div>
       </div>
 
-      {/* Extreme Low Action Zone */}
-      <div className="absolute bottom-0 left-0 right-0 p-1 md:p-2 bg-gradient-to-t from-[#05070a] via-[#05070a]/90 to-transparent pt-32 pointer-events-none">
+      {/* Responsive Action Zone */}
+      <div className="absolute bottom-0 left-0 right-0 p-3 md:p-6 bg-gradient-to-t from-[#05070a] via-[#05070a]/80 to-transparent pt-20 pointer-events-none">
         <form 
           onSubmit={handleSubmit} 
-          className="relative max-w-4xl mx-auto group pointer-events-auto transition-all duration-700 opacity-20 hover:opacity-100 focus-within:opacity-100 mb-2"
+          className="relative max-w-4xl mx-auto group pointer-events-auto transition-all duration-700 opacity-30 focus-within:opacity-100 hover:opacity-100"
         >
-          <div className="absolute -inset-1 bg-gradient-to-r from-violet-600/30 to-indigo-600/30 rounded-[28px] blur-md opacity-0 group-hover:opacity-30 group-focus-within:opacity-70 transition duration-700"></div>
+          <div className="absolute -inset-0.5 bg-gradient-to-r from-violet-600/20 to-indigo-600/20 rounded-[22px] blur opacity-0 group-focus-within:opacity-100 transition duration-500"></div>
           <div className="relative">
             <textarea
               rows={1}
@@ -197,15 +173,15 @@ export const ChatSanctuary: React.FC<ChatSanctuaryProps> = ({ messages, onSendMe
               }}
               dir={isArabicText(input) ? 'rtl' : 'ltr'}
               placeholder={placeholders[language]}
-              className={`w-full bg-[#0d1326]/60 backdrop-blur-3xl border border-white/10 rounded-[24px] py-4 px-8 focus:outline-none focus:border-violet-500/40 text-white placeholder-white/20 text-xl font-bold resize-none transition-all duration-300 shadow-2xl pr-20`}
+              className="w-full bg-[#0d1326]/80 backdrop-blur-3xl border border-white/10 rounded-[20px] py-4 px-6 focus:outline-none focus:border-violet-500/40 text-white placeholder-white/10 text-base md:text-xl font-bold resize-none shadow-2xl pr-16"
               disabled={isProcessing}
             />
             <button 
               type="submit" 
               disabled={isProcessing || !input.trim()}
-              className={`absolute bottom-2 right-4 p-3 bg-violet-600 hover:bg-violet-500 text-white rounded-2xl disabled:opacity-20 transition-all shadow-pro active:scale-90`}
+              className="absolute right-2.5 top-2.5 p-2.5 bg-violet-600 hover:bg-violet-500 text-white rounded-xl disabled:opacity-20 transition-all active:scale-90"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
             </button>
           </div>
         </form>
