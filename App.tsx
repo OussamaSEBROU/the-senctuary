@@ -47,7 +47,7 @@ const App: React.FC = () => {
       openInNewTab: "View Full Screen",
       waitQuote: "Decoding the axiomatic structures of the manuscript...",
       covenant: "The Sanctuary Covenant: Direct reading and personal comprehension are the only paths to wisdom.",
-      startChat: "Enter the Sanctuary"
+      startChat: "Engage Knowledge Deeply"
     },
     ar: {
       newResearch: "بحث جديد",
@@ -64,7 +64,7 @@ const App: React.FC = () => {
       openInNewTab: "فتح المخطوطة في نافذة جديدة",
       waitQuote: "فك شيفرة الهياكل البديهية للمخطوطة...",
       covenant: "عهد الملاذ: القراءة المباشرة والفهم الشخصي هما المساران الوحيدان للحكمة الحقيقية.",
-      startChat: "دخول الملاذ"
+      startChat: "تحاور مع المعرفة بعمق"
     }
   }), []);
 
@@ -213,13 +213,13 @@ const App: React.FC = () => {
         </div>
       )}
 
-      {/* Sidebar Overlay - Always visible for both desktop/mobile when open */}
+      {/* Sidebar Overlay */}
       <div 
         className={`fixed inset-0 bg-black/80 z-40 transition-opacity duration-500 ${sidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
         onClick={() => setSidebarOpen(false)}
       />
 
-      {/* Sidebar - Now hidden by default on all screens until toggled */}
+      {/* Sidebar */}
       <aside className={`
         fixed top-0 bottom-0 ${isRtl ? 'right-0' : 'left-0'} z-50
         w-[85vw] md:w-80 transition-transform duration-500 ease-in-out border-r border-white/5 
@@ -273,11 +273,12 @@ const App: React.FC = () => {
 
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col relative min-w-0 bg-[#05070a]">
-        {/* Header - Sidebar button always visible */}
-        <header className="h-16 md:h-20 flex items-center justify-between px-4 md:px-8 z-30 shrink-0 border-b border-white/5 bg-[#05070a]/80 backdrop-blur-xl">
+        {/* Header - Sidebar button ALWAYS VISIBLE on all screens */}
+        <header className="h-16 md:h-20 flex items-center justify-between px-4 md:px-8 z-[60] shrink-0 border-b border-white/5 bg-[#05070a]/80 backdrop-blur-xl">
           <button 
             onClick={() => setSidebarOpen(true)}
-            className="p-2.5 bg-white text-black hover:scale-110 rounded-xl transition-all shadow-pro flex items-center justify-center"
+            className="p-2.5 bg-white text-black hover:scale-110 rounded-xl transition-all shadow-pro flex items-center justify-center shrink-0"
+            aria-label="Toggle Menu"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
           </button>
