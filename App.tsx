@@ -42,9 +42,7 @@ const App: React.FC = () => {
       synthesizing: "Analyzing thematic structures...",
       ready: "Sanctuary Ready",
       processing: "Processing...",
-      dev: "Developed by Oussama SEBROU",
-      openInNewTab: "View Full Screen",
-      pdfError: "Browser restricted viewer."
+      openInNewTab: "View Full Screen"
     },
     ar: {
       newResearch: "بحث جديد",
@@ -58,9 +56,7 @@ const App: React.FC = () => {
       synthesizing: "تحليل الهياكل الموضوعية...",
       ready: "الملاذ جاهز",
       processing: "معالجة...",
-      dev: "تم التطوير بواسطة أسامة سبرو",
-      openInNewTab: "عرض بملء الشاشة",
-      pdfError: "المتصفح يقيّد العرض."
+      openInNewTab: "فتح المخطوطة في نافذة جديدة"
     }
   }), []);
 
@@ -152,16 +148,16 @@ const App: React.FC = () => {
 
   return (
     <div className={`flex h-screen bg-[#05070a] text-slate-200 overflow-hidden ${isRtl ? 'flex-row-reverse' : ''}`}>
-      {/* Overlay for Mobile Sidebar */}
+      {/* Mobile Sidebar Overlay */}
       <div 
         className={`fixed inset-0 bg-black/80 z-40 transition-opacity duration-500 lg:hidden ${sidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
         onClick={() => setSidebarOpen(false)}
       />
 
-      {/* Sidebar - Optimized for all screens */}
+      {/* Responsive Sidebar */}
       <aside className={`
         fixed lg:static top-0 bottom-0 ${isRtl ? 'right-0' : 'left-0'} z-50
-        w-[85vw] md:w-80 transition-transform duration-500 ease-in-out border-r border-white/5 
+        w-[80vw] md:w-80 transition-transform duration-500 ease-in-out border-r border-white/5 
         bg-[#05070a] shadow-2xl flex flex-col overflow-hidden
         ${sidebarOpen ? 'translate-x-0' : (isRtl ? 'translate-x-full' : '-translate-x-full lg:translate-x-0')}
       `}>
@@ -175,7 +171,7 @@ const App: React.FC = () => {
 
           <label className="mb-6 cursor-pointer group">
             <input type="file" accept="application/pdf" onChange={handleFileUpload} className="hidden" />
-            <div className="flex items-center gap-3 p-4 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 transition-all">
+            <div className="flex items-center gap-3 p-4 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 transition-all shadow-pro">
               <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-black shadow-pro shrink-0">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14"/></svg>
               </div>
@@ -230,7 +226,7 @@ const App: React.FC = () => {
             <h1 className="text-xl md:text-2xl font-black tracking-tighter glow-text-violet uppercase italic">
               Knowledge AI
             </h1>
-            <p className="hidden md:block text-[9px] font-black uppercase tracking-[0.2em] text-white/20 italic mt-0.5">
+            <p className="hidden sm:block text-[8px] md:text-[9px] font-black uppercase tracking-[0.2em] text-white/20 italic mt-0.5">
               this is an extension of the 5minute paper project
             </p>
           </div>
@@ -257,8 +253,8 @@ const App: React.FC = () => {
                
                <label className="group relative block cursor-pointer w-full max-w-md">
                   <input type="file" accept="application/pdf" onChange={handleFileUpload} className="hidden" />
-                  <div className="glass rounded-[30px] p-10 border-2 border-dashed border-white/5 hover:border-violet-500/30 transition-all duration-700 flex flex-col items-center justify-center">
-                    <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mb-6 border border-white/10">
+                  <div className="glass rounded-[30px] p-8 md:p-12 border-2 border-dashed border-white/5 hover:border-violet-500/30 transition-all duration-700 flex flex-col items-center justify-center">
+                    <div className="w-14 h-14 md:w-16 md:h-16 bg-white/5 rounded-2xl flex items-center justify-center mb-6 border border-white/10 shadow-pro">
                       <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-white/80">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
                       </svg>
@@ -273,10 +269,10 @@ const App: React.FC = () => {
               {activeView === 'chat' && (
                 <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
                   {state.axioms.length > 0 && (
-                    <div className="shrink-0 max-h-[25vh] overflow-y-auto p-4 md:p-6 custom-scrollbar bg-white/[0.01] border-b border-white/5">
+                    <div className="shrink-0 max-h-[30vh] overflow-y-auto p-3 md:p-6 custom-scrollbar bg-white/[0.01] border-b border-white/5">
                       <div className="max-w-7xl mx-auto">
-                        <div className={`flex items-center gap-4 mb-4 ${isRtl ? 'flex-row-reverse' : ''}`}>
-                           <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20">{t.axiomsHeader}</h3>
+                        <div className={`flex items-center gap-4 mb-3 md:mb-4 ${isRtl ? 'flex-row-reverse' : ''}`}>
+                           <h3 className="text-[9px] font-black uppercase tracking-[0.4em] text-white/20">{t.axiomsHeader}</h3>
                            <div className="flex-1 h-[1px] bg-white/5"></div>
                         </div>
                         <AxiomCards axioms={state.axioms} />
@@ -294,19 +290,32 @@ const App: React.FC = () => {
                 </div>
               )}
               {activeView === 'pdf' && state.pdfUrl && (
-                <div className="flex-1 p-2 md:p-6 flex flex-col items-center h-full min-h-0">
-                  <div className="w-full flex-1 glass rounded-2xl overflow-hidden border border-white/10 relative">
-                    <embed src={state.pdfUrl} type="application/pdf" className="w-full h-full" />
+                <div className="flex-1 p-4 md:p-6 flex flex-col items-center h-full min-h-0">
+                  <div className="w-full flex-1 glass rounded-2xl overflow-hidden border border-white/10 relative shadow-pro bg-black/40">
+                    <iframe 
+                      src={state.pdfUrl} 
+                      title="PDF Manuscript"
+                      className="w-full h-full border-none"
+                    />
                   </div>
+                  <a 
+                    href={state.pdfUrl} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="mt-4 lg:hidden px-6 py-3 bg-violet-600/20 border border-violet-500/20 rounded-xl text-[10px] font-black uppercase tracking-widest text-white flex items-center gap-2"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+                    {t.openInNewTab}
+                  </a>
                 </div>
               )}
             </div>
           )}
         </div>
 
-        <footer className="h-8 flex items-center justify-center border-t border-white/5 bg-[#05070a] px-4">
-           <p className="text-[8px] text-white/10 font-black uppercase tracking-[0.5em] truncate">
-             {t.dev}
+        <footer className="h-8 flex items-center justify-center border-t border-white/5 bg-[#05070a] px-4 shrink-0">
+           <p className="text-[8px] text-white/20 font-black uppercase tracking-[0.5em] truncate">
+             Developed by Oussama SEBROU
            </p>
         </footer>
       </main>
