@@ -38,13 +38,13 @@ const App: React.FC = () => {
       help: "Support Center",
       axiomsHeader: "Axiomatic Insights",
       activeDoc: "Active Manuscript",
-      uploadPrompt: "Upload your manuscript",
+      uploadPrompt: "Upload manuscript",
       synthesizing: "Analyzing thematic structures...",
       ready: "Sanctuary Ready",
-      processing: "Deep Processing...",
+      processing: "Processing...",
       dev: "Developed by Oussama SEBROU",
       openInNewTab: "View Full Screen",
-      pdfError: "If the manuscript does not appear, your browser may be restricting the built-in viewer."
+      pdfError: "Browser restricted viewer."
     },
     ar: {
       newResearch: "بحث جديد",
@@ -54,13 +54,13 @@ const App: React.FC = () => {
       help: "مركز الدعم",
       axiomsHeader: "الرؤى البديهية",
       activeDoc: "المخطوطة النشطة",
-      uploadPrompt: "قم برفع المخطوطة",
+      uploadPrompt: "رفع المخطوطة",
       synthesizing: "تحليل الهياكل الموضوعية...",
       ready: "الملاذ جاهز",
-      processing: "معالجة عميقة...",
+      processing: "معالجة...",
       dev: "تم التطوير بواسطة أسامة سبرو",
       openInNewTab: "عرض بملء الشاشة",
-      pdfError: "إذا لم تظهر المخطوطة، فقد يكون متصفحك يقيّد عارض الملفات المدمج."
+      pdfError: "المتصفح يقيّد العرض."
     }
   }), []);
 
@@ -148,29 +148,27 @@ const App: React.FC = () => {
     }
   };
 
-  const toggleLanguage = () => {
-    setState(prev => ({ ...prev, language: prev.language === 'en' ? 'ar' : 'en' }));
-  };
-
   const isRtl = state.language === 'ar';
 
   return (
     <div className={`flex h-screen bg-[#05070a] text-slate-200 overflow-hidden ${isRtl ? 'flex-row-reverse' : ''}`}>
+      {/* Overlay for Mobile Sidebar */}
       <div 
-        className={`fixed inset-0 bg-black/80 z-30 transition-opacity duration-500 ${sidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+        className={`fixed inset-0 bg-black/80 z-40 transition-opacity duration-500 lg:hidden ${sidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
         onClick={() => setSidebarOpen(false)}
       />
 
+      {/* Sidebar - Optimized for all screens */}
       <aside className={`
-        fixed top-0 bottom-0 ${isRtl ? 'right-0' : 'left-0'} z-40
-        w-80 transition-transform duration-500 ease-in-out border-r border-white/5 
+        fixed lg:static top-0 bottom-0 ${isRtl ? 'right-0' : 'left-0'} z-50
+        w-[85vw] md:w-80 transition-transform duration-500 ease-in-out border-r border-white/5 
         bg-[#05070a] shadow-2xl flex flex-col overflow-hidden
-        ${sidebarOpen ? 'translate-x-0' : (isRtl ? 'translate-x-full' : '-translate-x-full')}
+        ${sidebarOpen ? 'translate-x-0' : (isRtl ? 'translate-x-full' : '-translate-x-full lg:translate-x-0')}
       `}>
-        <div className="p-6 flex flex-col h-full w-80">
+        <div className="p-4 md:p-6 flex flex-col h-full">
           <div className="flex items-center justify-between mb-8">
             <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20">Knowledge Repository</span>
-            <button onClick={() => setSidebarOpen(false)} className="p-2 hover:bg-white/5 rounded-full transition-colors">
+            <button onClick={() => setSidebarOpen(false)} className="p-2 hover:bg-white/5 rounded-full transition-colors lg:hidden">
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
             </button>
           </div>
@@ -178,116 +176,114 @@ const App: React.FC = () => {
           <label className="mb-6 cursor-pointer group">
             <input type="file" accept="application/pdf" onChange={handleFileUpload} className="hidden" />
             <div className="flex items-center gap-3 p-4 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 transition-all">
-              <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-black shadow-pro">
+              <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-black shadow-pro shrink-0">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14"/></svg>
               </div>
-              <span className="font-bold text-sm tracking-tight uppercase tracking-wider">{t.newResearch}</span>
+              <span className="font-bold text-xs uppercase tracking-wider truncate">{t.newResearch}</span>
             </div>
           </label>
 
-          <nav className="flex-1 space-y-2 overflow-y-auto custom-scrollbar pr-1">
+          <nav className="flex-1 space-y-1 overflow-y-auto custom-scrollbar pr-1">
             <button 
               onClick={() => { setActiveView('chat'); setSidebarOpen(false); }}
-              className={`w-full flex items-center gap-4 p-4 rounded-2xl transition-all ${activeView === 'chat' ? 'bg-white/10 text-white shadow-pro' : 'hover:bg-white/5 text-slate-400'}`}
+              className={`w-full flex items-center gap-4 p-3 rounded-2xl transition-all ${activeView === 'chat' ? 'bg-white/10 text-white shadow-pro' : 'hover:bg-white/5 text-slate-400'}`}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-              <span className="text-sm font-bold uppercase tracking-wide">{t.dialogue}</span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              <span className="text-xs font-bold uppercase tracking-wide">{t.dialogue}</span>
             </button>
             <button 
               onClick={() => { setActiveView('pdf'); setSidebarOpen(false); }}
               disabled={!state.pdfUrl}
-              className={`w-full flex items-center gap-4 p-4 rounded-2xl transition-all disabled:opacity-20 ${activeView === 'pdf' ? 'bg-white/10 text-white shadow-pro' : 'hover:bg-white/5 text-slate-400'}`}
+              className={`w-full flex items-center gap-4 p-3 rounded-2xl transition-all disabled:opacity-20 ${activeView === 'pdf' ? 'bg-white/10 text-white shadow-pro' : 'hover:bg-white/5 text-slate-400'}`}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
-              <span className="text-sm font-bold uppercase tracking-wide">{t.fullPdf}</span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <span className="text-xs font-bold uppercase tracking-wide">{t.fullPdf}</span>
             </button>
           </nav>
 
-          <div className="mt-auto pt-6 space-y-4 border-t border-white/5">
-            <button onClick={() => { setActiveView('about'); setSidebarOpen(false); }} className="w-full text-left p-4 text-xs font-black text-white/40 hover:text-white transition-colors flex items-center gap-4 uppercase tracking-[0.3em]">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+          <div className="mt-auto pt-6 space-y-2 border-t border-white/5">
+            <button onClick={() => { setActiveView('about'); setSidebarOpen(false); }} className="w-full text-left p-3 text-[9px] font-black text-white/30 hover:text-white transition-colors flex items-center gap-4 uppercase tracking-[0.3em]">
                 {t.about}
             </button>
-            <button onClick={() => { setActiveView('help'); setSidebarOpen(false); }} className="w-full text-left p-4 text-xs font-black text-white/40 hover:text-white transition-colors flex items-center gap-4 uppercase tracking-[0.3em]">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+            <button onClick={() => { setActiveView('help'); setSidebarOpen(false); }} className="w-full text-left p-3 text-[9px] font-black text-white/30 hover:text-white transition-colors flex items-center gap-4 uppercase tracking-[0.3em]">
                 {t.help}
             </button>
-            <button onClick={toggleLanguage} className="w-full flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5 hover:bg-white/10 transition-all">
-              <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.4em]">Language</span>
-              <span className="text-xs font-black text-white">{state.language.toUpperCase()}</span>
+            <button onClick={() => setState(p => ({ ...p, language: p.language === 'en' ? 'ar' : 'en' }))} className="w-full flex items-center justify-between p-3 bg-white/5 rounded-2xl border border-white/5">
+              <span className="text-[9px] font-black text-white/20 uppercase tracking-[0.4em]">Language</span>
+              <span className="text-[10px] font-black text-white">{state.language.toUpperCase()}</span>
             </button>
           </div>
         </div>
       </aside>
 
-      <main className="flex-1 flex flex-col relative h-screen bg-[#05070a]">
-        <header className="h-20 flex items-center justify-between px-8 z-20 shrink-0 border-b border-white/5">
+      {/* Main Content Area */}
+      <main className="flex-1 flex flex-col relative min-w-0 bg-[#05070a]">
+        <header className="h-16 md:h-20 flex items-center justify-between px-4 md:px-8 z-30 shrink-0 border-b border-white/5 bg-[#05070a]/80 backdrop-blur-xl">
           <button 
             onClick={() => setSidebarOpen(true)}
-            className="p-3 bg-white/5 hover:bg-white/10 rounded-2xl transition-all shadow-pro border border-white/5 group"
+            className="p-2 md:p-3 bg-white/5 hover:bg-white/10 rounded-xl transition-all border border-white/5 lg:hidden"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-white group-hover:scale-110 transition-transform"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
           </button>
           
-          <div className="flex flex-col items-center">
-            <h1 className="text-2xl md:text-3xl font-black tracking-tighter glow-text-violet uppercase italic">
+          <div className="flex flex-col items-center flex-1 lg:flex-none">
+            <h1 className="text-xl md:text-2xl font-black tracking-tighter glow-text-violet uppercase italic">
               Knowledge AI
             </h1>
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 italic">
+            <p className="hidden md:block text-[9px] font-black uppercase tracking-[0.2em] text-white/20 italic mt-0.5">
               this is an extension of the 5minute paper project
             </p>
           </div>
 
           <div className="flex items-center gap-4">
-             <div className="hidden md:flex items-center gap-3 px-4 py-2 bg-white/5 rounded-2xl border border-white/10 shadow-pro">
-                <span className={`h-2 w-2 rounded-full ${state.isProcessing ? 'bg-violet-500 animate-ping' : 'bg-white/10'}`}></span>
-                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40">{state.status}</span>
+             <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-xl border border-white/10">
+                <span className={`h-1.5 w-1.5 rounded-full ${state.isProcessing ? 'bg-violet-500 animate-pulse' : 'bg-white/10'}`}></span>
+                <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white/40">{state.status}</span>
              </div>
           </div>
         </header>
 
-        <div className="flex-1 relative overflow-hidden flex flex-col h-full">
-          {!state.pdfBase64 && activeView !== 'about' && activeView !== 'help' ? (
-            <div className="flex-1 flex flex-col items-center justify-center p-8 text-center animate-in fade-in zoom-in duration-1000">
-               <div className="mb-12 relative">
-                  <div className="absolute -inset-10 bg-violet-600/[0.05] blur-3xl rounded-full" />
-                  <h2 className="text-6xl md:text-8xl font-black text-white/90 mb-6 tracking-tighter italic">
+        <div className="flex-1 relative overflow-hidden flex flex-col min-h-0">
+          {!state.pdfBase64 && activeView === 'chat' ? (
+            <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
+               <div className="mb-10 relative">
+                  <h2 className="text-4xl md:text-7xl font-black text-white/90 mb-4 tracking-tighter italic">
                     The <span className="glow-text-violet">Sanctuary</span>
                   </h2>
-                  <p className="text-xl md:text-2xl text-white/20 italic max-w-2xl mx-auto leading-relaxed font-bold tracking-tight">
-                    "High-performance institutional research developed by Knowledge AI team"
+                  <p className="text-sm md:text-xl text-white/20 italic max-w-md mx-auto leading-relaxed font-bold">
+                    "High-performance institutional research"
                   </p>
                </div>
                
-               <label className="group relative block cursor-pointer max-w-xl w-full">
+               <label className="group relative block cursor-pointer w-full max-w-md">
                   <input type="file" accept="application/pdf" onChange={handleFileUpload} className="hidden" />
-                  <div className="glass shadow-pro rounded-[40px] p-16 border-2 border-dashed border-white/5 hover:border-violet-500/30 transition-all duration-700 flex flex-col items-center justify-center group-hover:translate-y-[-8px]">
-                    <div className="w-24 h-24 bg-white/5 rounded-[30px] flex items-center justify-center mb-8 border border-white/10 group-hover:rotate-6 transition-transform shadow-pro">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-white/80">
+                  <div className="glass rounded-[30px] p-10 border-2 border-dashed border-white/5 hover:border-violet-500/30 transition-all duration-700 flex flex-col items-center justify-center">
+                    <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mb-6 border border-white/10">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-white/80">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
                       </svg>
                     </div>
-                    <h2 className="text-3xl font-black text-white mb-3 tracking-tight">{t.uploadPrompt}</h2>
-                    <p className="text-white/10 text-[10px] font-black uppercase tracking-[0.5em]">Intellectual Synthesis Protocol</p>
+                    <h2 className="text-xl font-black text-white mb-2">{t.uploadPrompt}</h2>
+                    <p className="text-white/10 text-[8px] font-black uppercase tracking-[0.4em]">Synthesis Protocol</p>
                   </div>
                 </label>
             </div>
           ) : (
-            <div className="flex-1 flex flex-col h-full overflow-hidden animate-in fade-in duration-500">
+            <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
               {activeView === 'chat' && (
-                <div className="flex-1 flex flex-col h-full overflow-hidden">
+                <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
                   {state.axioms.length > 0 && (
-                    <div className="shrink-0 max-h-[30vh] overflow-y-auto p-4 md:p-6 custom-scrollbar bg-white/[0.01] border-b border-white/5 shadow-inner">
+                    <div className="shrink-0 max-h-[25vh] overflow-y-auto p-4 md:p-6 custom-scrollbar bg-white/[0.01] border-b border-white/5">
                       <div className="max-w-7xl mx-auto">
                         <div className={`flex items-center gap-4 mb-4 ${isRtl ? 'flex-row-reverse' : ''}`}>
-                           <h3 className="text-xs font-black uppercase tracking-[0.4em] text-white/30">{t.axiomsHeader}</h3>
+                           <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20">{t.axiomsHeader}</h3>
                            <div className="flex-1 h-[1px] bg-white/5"></div>
                         </div>
                         <AxiomCards axioms={state.axioms} />
                       </div>
                     </div>
                   )}
-                  <div className="flex-1 min-h-0 relative h-full">
+                  <div className="flex-1 min-h-0 relative">
                     <ChatSanctuary 
                       messages={state.chatHistory} 
                       onSendMessage={handleSendMessage} 
@@ -298,49 +294,18 @@ const App: React.FC = () => {
                 </div>
               )}
               {activeView === 'pdf' && state.pdfUrl && (
-                <div className="flex-1 p-2 md:p-8 flex flex-col items-center h-full">
-                  <div className="w-full flex-1 glass rounded-[30px] overflow-hidden shadow-pro border border-white/10 relative">
-                    <embed 
-                      src={state.pdfUrl} 
-                      type="application/pdf" 
-                      className="w-full h-full rounded-[30px]"
-                    />
-                    <div className="absolute bottom-6 right-6 flex items-center gap-4 z-50">
-                        <a 
-                          href={state.pdfUrl} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="px-6 py-3 bg-white/5 backdrop-blur-3xl hover:bg-white/10 text-white rounded-xl text-[10px] font-black uppercase tracking-widest border border-white/10 shadow-2xl transition-all"
-                        >
-                          {t.openInNewTab} ↗
-                        </a>
-                    </div>
+                <div className="flex-1 p-2 md:p-6 flex flex-col items-center h-full min-h-0">
+                  <div className="w-full flex-1 glass rounded-2xl overflow-hidden border border-white/10 relative">
+                    <embed src={state.pdfUrl} type="application/pdf" className="w-full h-full" />
                   </div>
-                  <p className="mt-4 text-[10px] font-black uppercase tracking-widest text-white/10 text-center max-w-xl">
-                    {t.pdfError}
-                  </p>
-                </div>
-              )}
-              {(activeView === 'about' || activeView === 'help') && (
-                <div className="flex-1 p-16 overflow-y-auto custom-scrollbar">
-                   <div className="max-w-4xl mx-auto">
-                      <h2 className="text-6xl font-black italic mb-12 glow-text-violet uppercase tracking-tighter">{activeView === 'about' ? t.about : t.help}</h2>
-                      <div className="glass p-12 rounded-[40px] border border-white/10 space-y-8 text-white/40 leading-relaxed font-bold text-xl md:text-2xl shadow-pro">
-                         <p>
-                           {activeView === 'about' 
-                             ? "Knowledge AI is an elite research infrastructure developed by the Knowledge AI team. It is designed to distill wisdom from complex academic repositories using deep analytical alignment."
-                             : "The sanctuary facilitates brainstorming and organization. It is not a replacement for reading the primary text. Always maintain direct interaction with the manuscript."}
-                         </p>
-                      </div>
-                   </div>
                 </div>
               )}
             </div>
           )}
         </div>
 
-        <footer className="h-10 flex items-center justify-center border-t border-white/5 z-10 shrink-0 bg-[#05070a]">
-           <p className="text-[9px] text-white/5 font-black uppercase tracking-[0.8em]">
+        <footer className="h-8 flex items-center justify-center border-t border-white/5 bg-[#05070a] px-4">
+           <p className="text-[8px] text-white/10 font-black uppercase tracking-[0.5em] truncate">
              {t.dev}
            </p>
         </footer>
