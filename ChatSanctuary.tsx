@@ -6,7 +6,7 @@ import rehypeKatex from 'rehype-katex';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { atomDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { Copy, Check, Terminal, ShieldCheck } from 'lucide-react';
-import { Message } from './types';
+import { Message } from '../types';
 
 interface ChatSanctuaryProps {
   messages: Message[];
@@ -93,6 +93,7 @@ export const ChatSanctuary: React.FC<ChatSanctuaryProps> = ({ messages, onSendMe
 
   return (
     <div className="flex flex-col h-full w-full relative">
+      {/* Expanded Messages Area with Transparency Fade */}
       <div 
         ref={scrollRef} 
         className="flex-1 overflow-y-auto px-6 pt-12 pb-20 space-y-16 custom-scrollbar scroll-smooth transition-opacity duration-700 opacity-30 hover:opacity-100"
@@ -176,6 +177,7 @@ export const ChatSanctuary: React.FC<ChatSanctuaryProps> = ({ messages, onSendMe
         </div>
       </div>
 
+      {/* Extreme Low Action Zone */}
       <div className="absolute bottom-0 left-0 right-0 p-1 md:p-2 bg-gradient-to-t from-[#05070a] via-[#05070a]/90 to-transparent pt-32 pointer-events-none">
         <form 
           onSubmit={handleSubmit} 
