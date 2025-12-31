@@ -233,6 +233,9 @@ const App: React.FC = () => {
             <h1 className="text-2xl md:text-3xl font-black tracking-tighter glow-text-violet uppercase italic">
               Knowledge AI
             </h1>
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 italic">
+              this is an extension of the 5minute paper project
+            </p>
           </div>
 
           <div className="flex items-center gap-4">
