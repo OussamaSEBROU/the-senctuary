@@ -163,7 +163,7 @@ const App: React.FC = () => {
   return (
     <div className={`flex h-screen bg-[#05070a] text-slate-200 overflow-hidden ${isRtl ? 'flex-row-reverse' : ''}`}>
       
-      {/* 1. Synthesis & Covenant Overlay */}
+      {/* 1. Synthesis & Covenant Overlay - Highest Z (100) */}
       {isInitialAnalysis && (
         <div className="fixed inset-0 z-[100] bg-[#05070a] flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-500">
           <div className="absolute inset-0 bg-grid opacity-10"></div>
@@ -189,9 +189,9 @@ const App: React.FC = () => {
         </div>
       )}
 
-      {/* 2. Full Screen Axioms Overlay */}
+      {/* 2. Full Screen Axioms Overlay - Z (80) */}
       {showAxiomsOverlay && (
-        <div className="fixed inset-0 z-[90] bg-[#05070a]/98 backdrop-blur-3xl flex flex-col items-center justify-center p-4 md:p-12 animate-in zoom-in-95 duration-700">
+        <div className="fixed inset-0 z-[80] bg-[#05070a]/98 backdrop-blur-3xl flex flex-col items-center justify-center p-4 md:p-12 animate-in zoom-in-95 duration-700">
            <div className="max-w-7xl w-full flex flex-col items-center">
               <span className="text-[10px] md:text-[12px] font-black uppercase tracking-[0.5em] text-violet-500/60 mb-2">Synthesized Wisdom</span>
               <h2 className="text-2xl md:text-5xl font-black text-white mb-8 md:mb-16 tracking-tighter text-center uppercase italic">
@@ -213,15 +213,15 @@ const App: React.FC = () => {
         </div>
       )}
 
-      {/* Sidebar Overlay */}
+      {/* Sidebar Overlay - Z (110) */}
       <div 
-        className={`fixed inset-0 bg-black/80 z-40 transition-opacity duration-500 ${sidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+        className={`fixed inset-0 bg-black/80 z-[110] transition-opacity duration-500 ${sidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
         onClick={() => setSidebarOpen(false)}
       />
 
-      {/* Sidebar */}
+      {/* Sidebar - Z (120) */}
       <aside className={`
-        fixed top-0 bottom-0 ${isRtl ? 'right-0' : 'left-0'} z-50
+        fixed top-0 bottom-0 ${isRtl ? 'right-0' : 'left-0'} z-[120]
         w-[85vw] md:w-80 transition-transform duration-500 ease-in-out border-r border-white/5 
         bg-[#05070a] shadow-2xl flex flex-col overflow-hidden
         ${sidebarOpen ? 'translate-x-0' : (isRtl ? 'translate-x-full' : '-translate-x-full')}
@@ -273,26 +273,26 @@ const App: React.FC = () => {
 
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col relative min-w-0 bg-[#05070a]">
-        {/* Header - Sidebar button ALWAYS VISIBLE on all screens */}
-        <header className="h-16 md:h-20 flex items-center justify-between px-4 md:px-8 z-[60] shrink-0 border-b border-white/5 bg-[#05070a]/80 backdrop-blur-xl">
+        {/* Header - Sidebar button ALWAYS VISIBLE - Z (95) to stay above axioms synthesis */}
+        <header className="h-16 md:h-20 flex items-center justify-between px-4 md:px-8 z-[95] shrink-0 border-b border-white/5 bg-[#05070a]/80 backdrop-blur-xl">
           <button 
             onClick={() => setSidebarOpen(true)}
-            className="p-2.5 bg-white text-black hover:scale-110 rounded-xl transition-all shadow-pro flex items-center justify-center shrink-0"
+            className="p-2.5 bg-white text-black hover:scale-110 rounded-xl transition-all shadow-pro flex items-center justify-center shrink-0 active:scale-90"
             aria-label="Toggle Menu"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
           </button>
           
-          <div className="flex flex-col items-center flex-1">
-            <h1 className="text-xl md:text-2xl font-black tracking-tighter glow-text-violet uppercase italic">
+          <div className="flex flex-col items-center flex-1 mx-2">
+            <h1 className="text-xl md:text-2xl font-black tracking-tighter glow-text-violet uppercase italic text-center">
               Knowledge AI
             </h1>
-            <p className="hidden sm:block text-[8px] md:text-[9px] font-black uppercase tracking-[0.2em] text-white/20 italic mt-0.5">
+            <p className="hidden sm:block text-[8px] md:text-[9px] font-black uppercase tracking-[0.2em] text-white/20 italic mt-0.5 text-center">
               this is an extension of the 5minute paper project
             </p>
           </div>
 
-          <div className="flex items-center gap-4 hidden md:flex">
+          <div className="flex items-center gap-4 hidden md:flex shrink-0">
              <div className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-xl border border-white/10">
                 <span className={`h-1.5 w-1.5 rounded-full ${state.isProcessing ? 'bg-violet-500 animate-pulse' : 'bg-white/10'}`}></span>
                 <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white/40">{state.status}</span>
