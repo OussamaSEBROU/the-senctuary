@@ -95,7 +95,6 @@ export const ChatSanctuary: React.FC<ChatSanctuaryProps> = ({ messages, onSendMe
     ar: "القراءة المباشرة والفهم الشخصي هما المساران الوحيدان للحكمة الحقيقية."
   };
 
-  // تعديل الشفافية لتكون مرئية أكثر (0.4 بدلاً من 0.1)
   const visibilityClass = isGhostMode 
     ? "opacity-40 md:opacity-50 hover:opacity-100 transition-opacity duration-700 ease-out" 
     : "opacity-100 transition-opacity duration-300 ease-in";
@@ -111,7 +110,7 @@ export const ChatSanctuary: React.FC<ChatSanctuaryProps> = ({ messages, onSendMe
             <div className="animate-in fade-in slide-in-from-bottom duration-1000 py-6">
                <div className="glass bg-violet-600/5 p-6 rounded-[24px] border border-violet-500/10 flex flex-col items-center text-center">
                  <ShieldCheck className="text-violet-500/30 mb-3" size={32} />
-                 <p className={`text-sm md:text-base font-bold text-white/30 italic leading-relaxed max-w-md ${language === 'ar' ? 'text-right' : 'text-left'}`} dir={language === 'ar' ? 'rtl' : 'ltr'}>
+                 <p className={`text-xs md:text-sm font-bold text-white/30 italic leading-relaxed max-w-md ${language === 'ar' ? 'text-right' : 'text-left'}`} dir={language === 'ar' ? 'rtl' : 'ltr'}>
                    {covenant[language]}
                  </p>
                </div>
@@ -172,7 +171,6 @@ export const ChatSanctuary: React.FC<ChatSanctuaryProps> = ({ messages, onSendMe
         </div>
       </div>
 
-      {/* Action Zone - تم رفع الشفافية ليكون أكثر وضوحاً */}
       <div className="absolute bottom-0 left-0 right-0 p-3 md:p-6 bg-gradient-to-t from-[#05070a] via-[#05070a]/90 to-transparent pt-20 pointer-events-none z-20">
         <form 
           onSubmit={handleSubmit} 
