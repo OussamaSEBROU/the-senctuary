@@ -1,13 +1,17 @@
-import { GoogleGenAI, Type } from "@google/genai";
-import { Axiom } from "./types";
-import { SYSTEM_INSTRUCTION, getAxiomExtractionPrompt } from "./prompts";
 
+import { GoogleGenAI, Type } from "@google/genai";
+import { Axiom } from "../types";
+import { SYSTEM_INSTRUCTION, getAxiomExtractionPrompt } from "../prompts";
+
+// The model version requested: gemini-2.5-flash
 const MODEL_NAME = 'gemini-2.5-flash';
 
+// Initialize the GoogleGenAI client with the environment variable API key
 export const getGeminiClient = () => {
   return new GoogleGenAI({ apiKey: process.env.API_KEY });
 };
 
+// Extracts 6 axiomatic points from the PDF using the specified model
 export const extractAxioms = async (pdfBase64: string, language: 'en' | 'ar' = 'en'): Promise<Axiom[]> => {
   const ai = getGeminiClient();
   
@@ -29,6 +33,7 @@ export const extractAxioms = async (pdfBase64: string, language: 'en' | 'ar' = '
     config: {
       systemInstruction: SYSTEM_INSTRUCTION,
       responseMimeType: "application/json",
+      // Thinking budget is supported in 2.5 series
       thinkingConfig: { thinkingBudget: 4000 },
       responseSchema: {
         type: Type.ARRAY,
@@ -53,6 +58,7 @@ export const extractAxioms = async (pdfBase64: string, language: 'en' | 'ar' = '
   }
 };
 
+// Chat with the researcher using streaming responses
 export async function* chatWithResearchStream(
   pdfBase64: string,
   history: { role: 'user' | 'model'; text: string }[],
@@ -63,6 +69,7 @@ export async function* chatWithResearchStream(
   
   const contents = history.map((h) => {
     const parts: any[] = [{ text: h.text }];
+    // Re-attach PDF data to user messages for multi-turn grounding
     if (h.role === 'user' && pdfBase64) {
       parts.unshift({
         inlineData: {
