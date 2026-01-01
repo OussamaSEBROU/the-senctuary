@@ -110,3 +110,4 @@ const PageRenderer: React.FC<{ pdfDoc: any, pageNum: number }> = ({ pdfDoc, page
     </div>
   );
 };
+ 
