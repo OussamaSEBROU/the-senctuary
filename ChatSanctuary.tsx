@@ -78,7 +78,7 @@ export const ChatSanctuary: React.FC<ChatSanctuaryProps> = ({ messages, onSendMe
   const FixedInputBar = (
     <div className="fixed bottom-0 left-0 right-0 z-[500] pointer-events-none">
       <div className="w-full bg-gradient-to-t from-[#05070a] via-[#05070a]/98 to-transparent pt-8 pb-4 md:pb-6 px-4 pointer-events-auto">
-        <div className="max-w-6xl mx-auto w-full">
+        <div className="max-w-7xl mx-auto w-full px-4">
           <form onSubmit={handleSubmit} className="relative group">
             <div className="absolute -inset-[1px] bg-gradient-to-r from-violet-600/10 via-white/5 to-violet-600/10 rounded-[22px] blur-sm opacity-30 group-focus-within:opacity-100 transition-all duration-700"></div>
             <div className="relative bg-[#171717] rounded-[22px] p-1 flex items-center shadow-[0_10px_50px_rgba(0,0,0,0.9)] border border-white/[0.04] group-focus-within:border-white/10 transition-all duration-300">
@@ -124,7 +124,7 @@ export const ChatSanctuary: React.FC<ChatSanctuaryProps> = ({ messages, onSendMe
         ref={scrollRef} 
         className="flex-1 overflow-y-auto px-4 md:px-12 pt-20 pb-48 custom-scrollbar scroll-smooth"
       >
-        <div className="max-w-6xl mx-auto w-full flex flex-col space-y-12">
+        <div className="max-w-7xl mx-auto w-full flex flex-col space-y-12">
           {messages.length === 0 && (
             <div className="min-h-[50vh] flex flex-col items-center justify-center animate-in fade-in duration-1000">
                <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-6 shadow-2xl">
