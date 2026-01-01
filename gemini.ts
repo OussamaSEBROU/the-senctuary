@@ -1,3 +1,4 @@
+
 import { GoogleGenAI, Type } from "@google/genai";
 import { Axiom } from "./types";
 import { SYSTEM_INSTRUCTION, getAxiomExtractionPrompt } from "./prompts";
