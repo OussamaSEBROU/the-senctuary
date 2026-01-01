@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import ReactMarkdown from 'react-markdown';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
@@ -21,7 +22,6 @@ const isArabicText = (text: string): boolean => {
 
 const CodeBlock = ({ language, value }: { language: string; value: string }) => {
   const [copied, setCopied] = useState(false);
-
   const handleCopy = () => {
     navigator.clipboard.writeText(value);
     setCopied(true);
@@ -29,9 +29,9 @@ const CodeBlock = ({ language, value }: { language: string; value: string }) => 
   };
 
   return (
-    <div className="relative my-4 group rounded-xl overflow-hidden border border-white/10 shadow-lg">
-      <div className="flex items-center justify-between px-3 py-1.5 bg-black/80 border-b border-white/10 text-[8px] uppercase font-black tracking-widest text-white/40">
-        <div className="flex items-center gap-1.5">
+    <div className="relative my-4 group rounded-xl overflow-hidden border border-white/5 shadow-2xl">
+      <div className="flex items-center justify-between px-3 py-1 bg-black/80 border-b border-white/5 text-[8px] uppercase font-black tracking-widest text-white/30">
+        <div className="flex items-center gap-2">
           <Terminal size={10} className="text-violet-400" />
           <span>{language || 'code'}</span>
         </div>
@@ -43,13 +43,7 @@ const CodeBlock = ({ language, value }: { language: string; value: string }) => 
       <SyntaxHighlighter
         language={language || 'text'}
         style={atomDark}
-        customStyle={{
-          margin: 0,
-          background: '#000000',
-          padding: '1rem',
-          fontSize: '0.8rem',
-          lineHeight: '1.5',
-        }}
+        customStyle={{ margin: 0, background: '#000000', padding: '1rem', fontSize: '0.8rem', lineHeight: '1.5' }}
       >
         {value}
       </SyntaxHighlighter>
@@ -64,7 +58,7 @@ export const ChatSanctuary: React.FC<ChatSanctuaryProps> = ({ messages, onSendMe
 
   useEffect(() => {
     if (endRef.current) {
-      endRef.current.scrollIntoView({ behavior: 'smooth' });
+      endRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
     }
   }, [messages, isProcessing]);
 
@@ -77,35 +71,86 @@ export const ChatSanctuary: React.FC<ChatSanctuaryProps> = ({ messages, onSendMe
   };
 
   const placeholders = {
-    en: "Engage deep wisdom...",
-    ar: "تواصل مع العمق الفكري..."
+    en: "Engage with the manuscript...",
+    ar: "تفاعل مع المخطوطة..."
   };
 
+  const FixedInputBar = (
+    <div className="fixed bottom-0 left-0 right-0 z-[9999] pointer-events-none">
+      <div className="w-full bg-gradient-to-t from-[#05070a] via-[#05070a]/98 to-transparent pt-12 pb-4 md:pb-8 px-4 pointer-events-auto">
+        <div className="max-w-4xl mx-auto w-full">
+          <form onSubmit={handleSubmit} className="relative group">
+            <div className="absolute -inset-[1px] bg-gradient-to-r from-violet-600/10 via-white/5 to-violet-600/10 rounded-[22px] blur-sm opacity-30 group-focus-within:opacity-100 transition-all duration-700"></div>
+            <div className="relative bg-[#171717] rounded-[20px] p-1.5 md:p-2 flex items-center shadow-[0_10px_50px_rgba(0,0,0,0.9)] border border-white/[0.04] group-focus-within:border-white/10 transition-all duration-300">
+              <textarea
+                rows={1}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSubmit(e);
+                  }
+                }}
+                dir={isArabicText(input) ? 'rtl' : 'ltr'}
+                placeholder={placeholders[language]}
+                className="flex-1 bg-transparent border-none py-2 px-4 focus:outline-none text-white placeholder-zinc-700 text-[16px] font-medium resize-none min-h-[44px] max-h-[150px] custom-scrollbar"
+                disabled={isProcessing}
+              />
+              <button 
+                type="submit" 
+                disabled={isProcessing || !input.trim()}
+                className="w-10 h-10 md:w-11 md:h-11 bg-white text-black rounded-full flex items-center justify-center disabled:opacity-10 transition-all hover:scale-105 active:scale-95 shadow-xl shrink-0 mr-1"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M7 11L12 6L17 11M12 18V7" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+            </div>
+          </form>
+          <div className="mt-2 text-center opacity-20">
+            <p className="text-[7px] font-black text-white uppercase tracking-[0.4em]">
+              Knowledge AI Sanctuary | Developed by Oussama SEBROU
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
-    <div className="flex flex-col h-full w-full relative">
+    <div className="w-full h-screen relative flex flex-col bg-[#05070a] overflow-hidden">
       <div 
         ref={scrollRef} 
-        className="flex-1 overflow-y-auto px-4 md:px-8 pt-6 pb-28 space-y-8 custom-scrollbar scroll-smooth"
+        className="flex-1 overflow-y-auto px-4 md:px-12 lg:px-24 pt-20 pb-48 custom-scrollbar scroll-smooth"
       >
-        <div className="max-w-4xl mx-auto w-full">
+        <div className="max-w-4xl mx-auto w-full flex flex-col space-y-10">
+          {messages.length === 0 && (
+            <div className="min-h-[50vh] flex flex-col items-center justify-center animate-in fade-in duration-1000">
+               <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-6 shadow-2xl">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="text-white opacity-20"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>
+               </div>
+               <h2 className="text-[10px] font-black uppercase tracking-[0.5em] text-white/10 italic">Sanctuary Online</h2>
+            </div>
+          )}
+
           {messages.map((msg, idx) => {
             const isModel = msg.role === 'model';
             const isAr = isArabicText(msg.text);
             
             return (
-              <div 
-                key={idx} 
-                className={`flex w-full ${isModel ? 'justify-start' : 'justify-end'} animate-in fade-in duration-500 mb-6`}
-              >
-                <div className={`flex gap-3 md:gap-6 max-w-[98%] md:max-w-full ${isModel ? 'flex-row' : 'flex-row-reverse'}`}>
-                  <div className={`w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl flex-shrink-0 flex items-center justify-center text-[7px] md:text-[9px] font-black border border-white/5 shadow-pro select-none ${
-                    !isModel ? 'bg-violet-600 text-white' : 'bg-white/5 text-violet-400'
+              <div key={idx} className={`flex w-full ${isModel ? 'justify-start' : 'justify-end'} animate-in slide-in-from-bottom-2 duration-300`}>
+                <div className={`flex gap-3 md:gap-6 max-w-full w-full ${isModel ? 'flex-row' : 'flex-row-reverse'}`}>
+                  <div className={`w-9 h-9 rounded-xl flex-shrink-0 flex items-center justify-center text-[10px] font-black border border-white/5 select-none ${
+                    !isModel ? 'bg-zinc-800 text-white' : 'bg-white/5 text-violet-400 border-violet-500/10'
                   }`}>
-                    {isModel ? 'K-AI' : 'USR'}
+                    {isModel ? 'AI' : 'ME'}
                   </div>
 
-                  <div className={`flex-1 min-w-0 ${isModel ? 'border-l border-white/5 pl-3 md:pl-5' : ''}`}>
-                    <div className={`prose prose-invert max-w-none opacity-100 ${isAr ? 'text-right font-bold text-base md:text-lg leading-relaxed' : 'text-left font-medium text-sm md:text-base leading-relaxed'}`} dir={isAr ? 'rtl' : 'ltr'}>
+                  <div className="flex-1 min-w-0">
+                    <div className={`prose prose-invert max-w-none text-[16px] break-words ${
+                        isModel ? 'text-white leading-relaxed' : 'text-slate-200 font-medium leading-relaxed'
+                      } ${isAr ? 'text-right' : 'text-left'}`} dir={isAr ? 'rtl' : 'ltr'}>
                       <ReactMarkdown
                         remarkPlugins={[remarkMath]}
                         rehypePlugins={[rehypeKatex]}
@@ -115,21 +160,25 @@ export const ChatSanctuary: React.FC<ChatSanctuaryProps> = ({ messages, onSendMe
                             return !inline && match ? (
                               <CodeBlock language={match[1]} value={String(children).replace(/\n$/, '')} />
                             ) : (
-                              <code className="bg-white/5 px-1.5 py-0.5 rounded text-violet-300 font-mono text-[0.85em]" {...props}>
+                              <code className="bg-white/5 px-1.5 py-0.5 rounded text-violet-400 font-mono text-[0.9em]" {...props}>
                                 {children}
                               </code>
                             );
                           },
-                          h1: ({children}) => <h1 className="text-lg md:text-xl font-black mb-3">{children}</h1>,
-                          h2: ({children}) => <h2 className="text-base md:text-lg font-black mb-2">{children}</h2>,
+                          h1: ({children}) => <h1 className="text-xl font-black mb-4 text-white border-b border-white/5 pb-2">{children}</h1>,
+                          h2: ({children}) => <h2 className="text-lg font-bold mb-3 text-white/90">{children}</h2>,
+                          p: ({children}) => <p className="mb-4 last:mb-0">{children}</p>,
+                          ul: ({children}) => <ul className="list-disc pl-5 mb-4 space-y-2">{children}</ul>,
+                          ol: ({children}) => <ol className="list-decimal pl-5 mb-4 space-y-2">{children}</ol>,
+                          strong: ({children}) => <strong className="text-violet-400 font-black glow-text-violet">{children}</strong>
                         }}
                       >
                         {msg.text}
                       </ReactMarkdown>
                       {isProcessing && idx === messages.length - 1 && !msg.text && (
-                        <div className="flex gap-1.5 items-center mt-2">
-                          <span className="w-1 h-3 bg-violet-500 animate-pulse"></span>
-                          <span className="text-[8px] font-black text-violet-500/30 uppercase tracking-widest">Processing...</span>
+                        <div className="flex gap-2 items-center mt-3">
+                          <span className="w-1 h-4 bg-violet-500 animate-pulse rounded-full"></span>
+                          <span className="text-[9px] font-black text-violet-500/30 uppercase tracking-widest">Synthesizing...</span>
                         </div>
                       )}
                     </div>
@@ -142,39 +191,7 @@ export const ChatSanctuary: React.FC<ChatSanctuaryProps> = ({ messages, onSendMe
         </div>
       </div>
 
-      {/* Action Zone - More Solid and Always Visible */}
-      <div className="absolute bottom-0 left-0 right-0 p-3 md:p-6 bg-gradient-to-t from-[#05070a] via-[#05070a]/98 to-transparent pt-20 pointer-events-none z-20">
-        <form 
-          onSubmit={handleSubmit} 
-          className="relative max-w-3xl mx-auto group pointer-events-auto transition-all duration-300 opacity-100"
-        >
-          <div className="absolute -inset-1 bg-gradient-to-r from-violet-600/20 to-indigo-600/20 rounded-[22px] blur-sm opacity-0 group-focus-within:opacity-100 transition duration-500"></div>
-          <div className="relative">
-            <textarea
-              rows={1}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSubmit(e);
-                }
-              }}
-              dir={isArabicText(input) ? 'rtl' : 'ltr'}
-              placeholder={placeholders[language]}
-              className="w-full bg-[#0d1326] border border-white/20 rounded-[20px] py-4 px-6 focus:outline-none focus:border-violet-500 text-white placeholder-white/20 text-sm md:text-lg font-bold resize-none shadow-2xl pr-14 md:pr-16"
-              disabled={isProcessing}
-            />
-            <button 
-              type="submit" 
-              disabled={isProcessing || !input.trim()}
-              className="absolute right-2 top-2 md:right-3 md:top-3 p-2 md:p-2.5 bg-violet-600 hover:bg-violet-500 text-white rounded-xl disabled:opacity-20 transition-all shadow-lg active:scale-95"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
-            </button>
-          </div>
-        </form>
-      </div>
+      {createPortal(FixedInputBar, document.body)}
     </div>
   );
 };
