@@ -1,14 +1,13 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { Axiom, Message, ResearchState, Conversation } from './types';
-import { extractAxioms, chatWithResearchStream, generateEssenceTitle } from './services/gemini';
-import { AxiomCards } from './components/AxiomCards';
-import { ChatSanctuary } from './components/ChatSanctuary';
-import { ManuscriptViewer } from './components/ManuscriptViewer';
+import { extractAxioms, chatWithResearchStream, generateEssenceTitle } from './gemini';
+import { AxiomCards } from './AxiomCards';
+import { ChatSanctuary } from './ChatSanctuary';
+import { ManuscriptViewer } from './ManuscriptViewer';
 
 type ViewMode = 'chat' | 'pdf';
 
-// مفتاح التخزين المحلي لضمان استمرارية البيانات
 const STORAGE_KEY = 'knowledge_ai_sanctuary_archive_v1';
 
 const App: React.FC = () => {
@@ -30,7 +29,6 @@ const App: React.FC = () => {
   const [isInitialAnalysis, setIsInitialAnalysis] = useState(false);
   const [showAxiomsOverlay, setShowAxiomsOverlay] = useState(false);
 
-  // تحميل المحادثات المؤرشفة عند تشغيل التطبيق
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
@@ -42,7 +40,6 @@ const App: React.FC = () => {
     }
   }, []);
 
-  // حفظ التغييرات في الأرشيف تلقائياً
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(conversations));
   }, [conversations]);
@@ -88,7 +85,6 @@ const App: React.FC = () => {
 
   const t = labels[state.language];
 
-  // دالة لبدء جلسة بحث جديدة تماماً
   const startNewChat = () => {
     if (state.pdfUrl) URL.revokeObjectURL(state.pdfUrl);
     setState({
@@ -106,7 +102,6 @@ const App: React.FC = () => {
     setSidebarOpen(false);
   };
 
-  // دالة لتحميل محادثة مؤرشفة
   const loadConversation = (conv: Conversation) => {
     if (state.pdfUrl) URL.revokeObjectURL(state.pdfUrl);
     
@@ -141,7 +136,6 @@ const App: React.FC = () => {
     setSidebarOpen(false);
   };
 
-  // حذف محادثة من الأرشيف
   const deleteConversation = (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
     setConversations(prev => prev.filter(c => c.id !== id));
@@ -175,7 +169,7 @@ const App: React.FC = () => {
         
         try {
           const axioms = await extractAxioms(base64, state.language);
-          const newId = Date.now().toString(); // توليد معرف فريد للجلسة
+          const newId = Date.now().toString();
           
           setState(prev => ({ 
             ...prev, 
@@ -240,7 +234,6 @@ const App: React.FC = () => {
       
       const modelResp = fullText;
       
-      // منطق توليد العنوان الجوهري (7 كلمات) عند أول استجابة
       let dynamicTitle = t.untiltled;
       if (isFirstMessage) {
         dynamicTitle = await generateEssenceTitle(modelResp, state.language);
@@ -249,7 +242,6 @@ const App: React.FC = () => {
         if (existing) dynamicTitle = existing.title;
       }
 
-      // تحديث الأرشيف بالمحادثة الحالية
       setConversations(prevConvs => {
         const existingIdx = prevConvs.findIndex(c => c.id === currentId);
         
@@ -285,7 +277,7 @@ const App: React.FC = () => {
   return (
     <div className={`flex h-screen w-full bg-[#0a0f1d] text-slate-200 overflow-hidden ${isRtl ? 'flex-row-reverse' : ''}`}>
       
-      {/* Sidebar Toggle Button */}
+      {/* Sidebar Toggle */}
       <button 
         onClick={() => setSidebarOpen(true)}
         className={`fixed top-4 ${isRtl ? 'right-4' : 'left-4'} z-[4000] p-2.5 bg-indigo-600/20 border border-indigo-500/30 text-indigo-200 hover:bg-indigo-600/40 rounded-xl transition-all shadow-indigo-500/10 shadow-lg active:scale-95`}
@@ -324,7 +316,6 @@ const App: React.FC = () => {
             <button onClick={() => setSidebarOpen(false)} className="p-2 hover:bg-white/5 rounded-full text-slate-400 transition-colors"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
           </div>
 
-          {/* New Discourse Button */}
           <div className="px-3 mb-4">
             <button 
               onClick={startNewChat} 
@@ -337,7 +328,6 @@ const App: React.FC = () => {
             </button>
           </div>
 
-          {/* View Toggle */}
           <div className="px-3 mb-6 space-y-1">
             <button 
               onClick={() => { setActiveView('chat'); setSidebarOpen(false); }} 
@@ -356,7 +346,6 @@ const App: React.FC = () => {
             </button>
           </div>
 
-          {/* Archive List */}
           <div className="flex-1 overflow-hidden flex flex-col px-3">
             <h3 className="px-3 mb-3 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">{t.historyHeader}</h3>
             <div className="flex-1 overflow-y-auto custom-scrollbar pr-1 space-y-1 pb-6">
@@ -392,7 +381,6 @@ const App: React.FC = () => {
             </div>
           </div>
 
-          {/* Sidebar Footer */}
           <div className="p-4 border-t border-white/5 bg-[#0f172a]/50">
              <button onClick={() => setState(p => ({ ...p, language: p.language === 'en' ? 'ar' : 'en' }))} className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-all text-slate-400 group">
                 <div className="flex items-center gap-3">
@@ -405,7 +393,6 @@ const App: React.FC = () => {
         </div>
       </aside>
 
-      {/* Main Content Area */}
       <main className="flex-1 flex flex-col min-w-0 bg-transparent relative z-10">
         <header className="h-16 flex items-center justify-center px-4 z-[100] border-b border-white/5 bg-[#0a0f1d]/60 backdrop-blur-2xl">
           <h1 className="text-2xl font-black academic-serif tracking-[0.2em] uppercase italic shining-title">
