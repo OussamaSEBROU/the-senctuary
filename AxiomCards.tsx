@@ -43,3 +43,4 @@ export const AxiomCards: React.FC<AxiomCardsProps> = ({ axioms, variant = 'embed
     </div>
   );
 };
+ 
