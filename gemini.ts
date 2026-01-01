@@ -9,6 +9,43 @@ export const getGeminiClient = () => {
   return new GoogleGenAI({ apiKey: process.env.API_KEY });
 };
 
+/**
+ * يولد عنواناً جوهرياً للمحادثة يحاكي أسلوب Gemini.
+ * الشرط: 7 كلمات بالضبط تلخص روح الحوار.
+ */
+export const generateEssenceTitle = async (text: string, language: 'en' | 'ar' = 'en'): Promise<string> => {
+  const ai = getGeminiClient();
+  const prompt = language === 'ar' 
+    ? `قم بصياغة عنوان لهذه المحادثة بناءً على النص التالي بحيث يكون "7 كلمات بالضبط". يجب أن يكون العنوان عميقاً وجوهرياً وبأسلوب منصة Gemini. أخرج الـ 7 كلمات فقط وبدون أي مقدمات أو علامات ترقيم: \n\n${text}`
+    : `Summarize the essence of this conversation into EXACTLY 7 words. The title must be profound and conceptual in Gemini style. Output ONLY the 7 words: \n\n${text}`;
+
+  try {
+    const response = await ai.models.generateContent({
+      model: MODEL_NAME,
+      contents: prompt,
+      config: {
+        temperature: 0.7,
+        maxOutputTokens: 50,
+      }
+    });
+    
+    let title = response.text?.trim() || "";
+    // تنظيف النص وضمان عدد الكلمات
+    title = title.replace(/[#*`_\[\]()]/g, '').replace(/\n/g, ' ').trim();
+    const words = title.split(/\s+/).filter(w => w.length > 0);
+    
+    if (words.length > 7) {
+      return words.slice(0, 7).join(' ');
+    } else if (words.length > 0) {
+      return words.join(' ');
+    }
+    
+    return language === 'ar' ? "تأملات معرفية معمقة في جوهر المخطوطة" : "Deep Knowledge Reflections on the Manuscript";
+  } catch (e) {
+    return language === 'ar' ? "حوار بحثي في صلب المادة العلمية" : "Research Dialogue in Core Scientific Material";
+  }
+};
+
 export const extractAxioms = async (pdfBase64: string, language: 'en' | 'ar' = 'en'): Promise<Axiom[]> => {
   const ai = getGeminiClient();
   
