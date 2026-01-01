@@ -29,6 +29,7 @@ const App: React.FC = () => {
   const [isInitialAnalysis, setIsInitialAnalysis] = useState(false);
   const [showAxiomsOverlay, setShowAxiomsOverlay] = useState(false);
 
+  // تحميل الأرشيف من التخزين المحلي
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
@@ -40,6 +41,7 @@ const App: React.FC = () => {
     }
   }, []);
 
+  // حفظ الأرشيف تلقائياً عند أي تغيير
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(conversations));
   }, [conversations]);
@@ -285,7 +287,7 @@ const App: React.FC = () => {
         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
       </button>
 
-      {/* Analysis Overlays */}
+      {/* Overlays */}
       {isInitialAnalysis && (
         <div className="fixed inset-0 z-[5000] bg-[#0a0f1d] flex flex-col items-center justify-center p-6 text-center">
           <div className="w-16 h-16 rounded-full border-2 border-indigo-500/20 border-t-indigo-500 animate-spin mb-10"></div>
@@ -313,14 +315,11 @@ const App: React.FC = () => {
         <div className="flex flex-col h-full">
           <div className="p-4 flex items-center justify-between">
             <span className="text-[10px] font-black uppercase tracking-widest text-indigo-400">Memory Engine</span>
-            <button onClick={() => setSidebarOpen(false)} className="p-2 hover:bg-white/5 rounded-full text-slate-400 transition-colors"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
+            <button onClick={() => setSidebarOpen(false)} className="p-2 hover:bg-white/5 rounded-full text-slate-400"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
           </div>
 
           <div className="px-3 mb-4">
-            <button 
-              onClick={startNewChat} 
-              className="w-full flex items-center gap-3 p-3.5 rounded-2xl bg-indigo-600/10 border border-indigo-500/20 hover:bg-indigo-600/20 transition-all group shadow-inner"
-            >
+            <button onClick={startNewChat} className="w-full flex items-center gap-3 p-3.5 rounded-2xl bg-indigo-600/10 border border-indigo-500/20 hover:bg-indigo-600/20 transition-all group shadow-inner">
               <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white group-hover:rotate-90 transition-transform">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 5v14M5 12h14"/></svg>
               </div>
@@ -329,18 +328,11 @@ const App: React.FC = () => {
           </div>
 
           <div className="px-3 mb-6 space-y-1">
-            <button 
-              onClick={() => { setActiveView('chat'); setSidebarOpen(false); }} 
-              className={`w-full flex items-center gap-4 p-3 rounded-xl transition-all ${activeView === 'chat' ? 'bg-indigo-600/20 text-indigo-300 border border-indigo-500/20' : 'text-slate-400 hover:bg-white/5'}`}
-            >
+            <button onClick={() => { setActiveView('chat'); setSidebarOpen(false); }} className={`w-full flex items-center gap-4 p-3 rounded-xl transition-all ${activeView === 'chat' ? 'bg-indigo-600/20 text-indigo-300 border border-indigo-500/20' : 'text-slate-400 hover:bg-white/5'}`}>
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
               <span className="text-[11px] font-black uppercase tracking-widest">{t.dialogue}</span>
             </button>
-            <button 
-              onClick={() => { setActiveView('pdf'); setSidebarOpen(false); }} 
-              disabled={!state.pdfUrl}
-              className={`w-full flex items-center gap-4 p-3 rounded-xl transition-all disabled:opacity-10 ${activeView === 'pdf' ? 'bg-indigo-600/20 text-indigo-300 border border-indigo-500/20' : 'text-slate-400 hover:bg-white/5'}`}
-            >
+            <button onClick={() => { setActiveView('pdf'); setSidebarOpen(false); }} disabled={!state.pdfUrl} className={`w-full flex items-center gap-4 p-3 rounded-xl transition-all disabled:opacity-10 ${activeView === 'pdf' ? 'bg-indigo-600/20 text-indigo-300 border border-indigo-500/20' : 'text-slate-400 hover:bg-white/5'}`}>
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/></svg>
               <span className="text-[11px] font-black uppercase tracking-widest">{t.fullPdf}</span>
             </button>
@@ -355,24 +347,13 @@ const App: React.FC = () => {
                 </div>
               ) : (
                 conversations.map(conv => (
-                  <div 
-                    key={conv.id}
-                    onClick={() => loadConversation(conv)}
-                    className={`group relative flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all border ${
-                      state.activeId === conv.id 
-                        ? 'bg-indigo-900/30 text-indigo-100 border-indigo-500/30 font-semibold shadow-inner' 
-                        : 'bg-transparent text-slate-400 border-transparent hover:bg-white/5'
-                    }`}
-                  >
+                  <div key={conv.id} onClick={() => loadConversation(conv)} className={`group relative flex items-center gap-3 p-3 rounded-xl cursor-pointer transition-all border ${state.activeId === conv.id ? 'bg-indigo-900/30 text-indigo-100 border-indigo-500/30 font-semibold' : 'bg-transparent text-slate-400 border-transparent hover:bg-white/5'}`}>
                     <div className="flex-1 min-w-0">
-                      <p className={`text-[12px] leading-snug line-clamp-2 ${isRtl ? 'text-right font-medium' : 'text-left'}`}>
+                      <p className={`text-[12px] leading-snug line-clamp-2 ${isRtl ? 'text-right' : 'text-left'}`}>
                         {conv.title || t.untiltled}
                       </p>
                     </div>
-                    <button 
-                      onClick={(e) => deleteConversation(e, conv.id)}
-                      className="opacity-0 group-hover:opacity-100 p-1.5 hover:text-red-400 transition-all active:scale-90"
-                    >
+                    <button onClick={(e) => deleteConversation(e, conv.id)} className="opacity-0 group-hover:opacity-100 p-1.5 hover:text-red-400 transition-all active:scale-90">
                       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
                     </button>
                   </div>
@@ -381,7 +362,7 @@ const App: React.FC = () => {
             </div>
           </div>
 
-          <div className="p-4 border-t border-white/5 bg-[#0f172a]/50">
+          <div className="p-4 border-t border-white/5">
              <button onClick={() => setState(p => ({ ...p, language: p.language === 'en' ? 'ar' : 'en' }))} className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition-all text-slate-400 group">
                 <div className="flex items-center gap-3">
                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="group-hover:rotate-180 transition-transform"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
@@ -405,16 +386,13 @@ const App: React.FC = () => {
             <div className="flex-1 flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-1000">
                <div className="mb-12 relative">
                   <div className="absolute -inset-20 bg-indigo-600 blur-[140px] rounded-full opacity-20"></div>
-                  <h2 className="text-6xl md:text-8xl font-black academic-serif italic mb-4 tracking-tighter shining-title">
-                    Sanctuary
-                  </h2>
+                  <h2 className="text-6xl md:text-8xl font-black academic-serif italic mb-4 tracking-tighter shining-title">Sanctuary</h2>
                </div>
-               
                <label className="group cursor-pointer w-full max-w-sm">
                   <input type="file" accept="application/pdf" onChange={handleFileUpload} className="hidden" />
                   <div className="p-10 rounded-[40px] border-2 border-dashed border-white/10 hover:border-indigo-500/30 transition-all flex flex-col items-center bg-white/[0.02] hover:bg-white/[0.04] shadow-2xl">
-                    <div className="w-16 h-16 bg-indigo-600/10 rounded-2xl flex items-center justify-center mb-6 border border-indigo-500/10 group-hover:scale-110 transition-transform">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-indigo-400"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    <div className="w-16 h-16 bg-indigo-600/10 rounded-2xl flex items-center justify-center mb-6 border border-indigo-500/10 group-hover:scale-110 transition-transform text-indigo-400">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                     </div>
                     <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.5em]">{t.uploadPrompt}</span>
                   </div>
@@ -423,12 +401,7 @@ const App: React.FC = () => {
           ) : (
             <div className="flex-1 flex flex-col min-h-0">
               {activeView === 'chat' && (
-                <ChatSanctuary 
-                  messages={state.chatHistory} 
-                  onSendMessage={handleSendMessage} 
-                  isProcessing={state.isProcessing}
-                  language={state.language}
-                />
+                <ChatSanctuary messages={state.chatHistory} onSendMessage={handleSendMessage} isProcessing={state.isProcessing} language={state.language} />
               )}
               {activeView === 'pdf' && state.pdfBase64 && (
                 <ManuscriptViewer base64={state.pdfBase64} />
