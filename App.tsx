@@ -165,6 +165,15 @@ const App: React.FC = () => {
   return (
     <div className={`flex h-screen w-full bg-[#05070a] text-slate-200 overflow-hidden ${isRtl ? 'flex-row-reverse' : ''}`}>
       
+      {/* Sidebar Toggle Button - FIXED AND ALWAYS TOP */}
+      <button 
+        onClick={() => setSidebarOpen(true)}
+        className={`fixed top-3 ${isRtl ? 'right-4' : 'left-4'} z-[2500] p-2.5 bg-white text-black hover:scale-110 rounded-xl transition-all shadow-[0_10px_40px_rgba(255,255,255,0.3)] flex items-center justify-center active:scale-95`}
+        aria-label="Toggle Menu"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+      </button>
+
       {/* Loading Overlay */}
       {isInitialAnalysis && (
         <div className="fixed inset-0 z-[2000] bg-[#05070a] flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-500">
@@ -207,13 +216,13 @@ const App: React.FC = () => {
 
       {/* Sidebar Overlay */}
       <div 
-        className={`fixed inset-0 bg-black/80 z-[110] transition-opacity duration-500 ${sidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+        className={`fixed inset-0 bg-black/80 z-[2100] transition-opacity duration-500 ${sidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
         onClick={() => setSidebarOpen(false)}
       />
 
       {/* Sidebar */}
       <aside className={`
-        fixed top-0 bottom-0 ${isRtl ? 'right-0' : 'left-0'} z-[120]
+        fixed top-0 bottom-0 ${isRtl ? 'right-0' : 'left-0'} z-[2200]
         w-[80vw] md:w-72 transition-transform duration-500 ease-in-out border-r border-white/5 
         bg-[#05070a] shadow-2xl flex flex-col overflow-hidden
         ${sidebarOpen ? 'translate-x-0' : (isRtl ? 'translate-x-full' : '-translate-x-full')}
@@ -267,12 +276,7 @@ const App: React.FC = () => {
       <main className="flex-1 flex flex-col min-w-0 bg-[#05070a]">
         {/* Header */}
         <header className="h-14 md:h-16 flex items-center justify-between px-4 md:px-6 z-[100] shrink-0 border-b border-white/5 bg-[#05070a]/95 backdrop-blur-xl">
-          <button 
-            onClick={() => setSidebarOpen(true)}
-            className="p-2.5 bg-white text-black hover:scale-105 rounded-xl transition-all active:scale-95 flex items-center justify-center shrink-0"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
-          </button>
+          <div className="w-10 md:w-11"></div> {/* Spacer for fixed sidebar button */}
           
           <div className="flex flex-col items-center flex-1">
             <h1 className="text-lg md:text-xl font-black tracking-widest glow-text-violet uppercase italic">
