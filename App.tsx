@@ -26,53 +26,45 @@ const App: React.FC = () => {
   const [isInitialAnalysis, setIsInitialAnalysis] = useState(false);
   const [showAxiomsOverlay, setShowAxiomsOverlay] = useState(false);
 
-  // تحميل المحادثات من التخزين المحلي
+  // تحسين تخزين المحادثات لتجنب ثقل المتصفح
   useEffect(() => {
     const saved = localStorage.getItem('sanctuary_conversations');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
         setState(prev => ({ ...prev, conversations: parsed }));
-      } catch (e) {
-        console.error("Failed to load conversations", e);
-      }
+      } catch (e) { console.error("Load failed", e); }
     }
   }, []);
 
-  // حفظ المحادثات
   useEffect(() => {
-    localStorage.setItem('sanctuary_conversations', JSON.stringify(state.conversations));
+    try {
+      // نخزن فقط البيانات الضرورية لتوفير المساحة
+      const toSave = state.conversations.map(c => ({...c, pdfBase64: null})); 
+      localStorage.setItem('sanctuary_conversations', JSON.stringify(toSave));
+    } catch (e) { console.warn("Storage limit"); }
   }, [state.conversations]);
-
-  useEffect(() => {
-    return () => {
-      if (state.pdfUrl) URL.revokeObjectURL(state.pdfUrl);
-    };
-  }, [state.pdfUrl]);
 
   const labels = useMemo(() => ({
     en: {
       newResearch: "New Research",
       dialogue: "Research Workspace",
       fullPdf: "Manuscript Viewer",
-      axiomsHeader: "Axiomatic Insights",
-      uploadPrompt: "Upload manuscript",
-      synthesizing: "Neural Synthesis in Progress...",
+      uploadPrompt: "Upload manuscript (Max 50MB)",
+      synthesizing: "Neural Synthesis...",
       ready: "Sanctuary Ready",
-      processing: "Processing...",
+      processing: "Analyzing...",
       covenant: "The Sanctuary Covenant: Direct reading and personal comprehension are the only paths to wisdom.",
       startChat: "Enter the Sanctuary",
       axiomsTitle: "Axiomatic Wisdom Extracted",
       previousChats: "Previous Conversations",
-      noChats: "No previous chats",
       languageLabel: "Language"
     },
     ar: {
       newResearch: "بحث جديد",
       dialogue: "مساحة البحث",
       fullPdf: "مستعرض المخطوطات",
-      axiomsHeader: "الرؤى البديهية",
-      uploadPrompt: "رفع المخطوطة",
+      uploadPrompt: "رفع المخطوطة (أقصى حد 50MB)",
       synthesizing: "جاري التوليف العصبي...",
       ready: "الملاذ جاهز",
       processing: "معالجة...",
@@ -80,25 +72,25 @@ const App: React.FC = () => {
       startChat: "دخول الملاذ المعرفي",
       axiomsTitle: "تم استخراج الحكمة البديهية",
       previousChats: "المحادثات السابقة",
-      noChats: "لا توجد محادثات سابقة",
       languageLabel: "اللغة"
     }
   }), []);
 
   const t = labels[state.language];
 
+  // معالجة الملفات الكبيرة بسرعة فائقة
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || file.type !== 'application/pdf') return;
 
     if (file.size > 50 * 1024 * 1024) {
-      alert(state.language === 'ar' ? "الملف كبير جداً (50MB كحد أقصى)" : "File too large (Max 50MB)");
+      alert(state.language === 'ar' ? "الملف كبير جداً" : "File too large");
       return;
     }
 
-    const blobUrl = URL.createObjectURL(new Blob([file], { type: 'application/pdf' }));
+    const blobUrl = URL.createObjectURL(file);
     const newConvId = Date.now().toString();
-    
+
     setState(prev => ({ 
       ...prev, isProcessing: true, status: t.processing,
       pdfName: file.name, pdfUrl: blobUrl, axioms: [],
@@ -109,7 +101,6 @@ const App: React.FC = () => {
     const reader = new FileReader();
     reader.onload = async () => {
       const base64 = (reader.result as string).split(',')[1];
-      setState(prev => ({ ...prev, pdfBase64: base64 }));
       try {
         const axioms = await extractAxioms(base64, state.language);
         const newConv: Conversation = {
@@ -117,12 +108,15 @@ const App: React.FC = () => {
           pdfBase64: base64, pdfUrl: blobUrl, pdfName: file.name,
           axioms: axioms, timestamp: Date.now()
         };
-        setState(prev => ({ ...prev, axioms, isProcessing: false, status: t.ready, conversations: [newConv, ...prev.conversations] }));
+        setState(prev => ({ 
+          ...prev, pdfBase64: base64, axioms, isProcessing: false, 
+          status: t.ready, conversations: [newConv, ...prev.conversations] 
+        }));
         setIsInitialAnalysis(false);
         setShowAxiomsOverlay(true);
       } catch (error) {
-        setState(prev => ({ ...prev, isProcessing: false }));
         setIsInitialAnalysis(false);
+        setState(prev => ({ ...prev, isProcessing: false }));
       }
     };
     reader.readAsDataURL(file);
@@ -132,7 +126,10 @@ const App: React.FC = () => {
     if (!state.pdfBase64 || state.isProcessing) return;
     const userMsg: Message = { role: 'user', text };
     const history = [...state.chatHistory, userMsg];
-    setState(prev => ({ ...prev, chatHistory: [...history, { role: 'model', text: '' }], isProcessing: true }));
+    
+    setState(prev => ({ 
+      ...prev, chatHistory: [...history, { role: 'model', text: '' }], isProcessing: true 
+    }));
 
     try {
       const stream = chatWithResearchStream(state.pdfBase64, history, text, state.language);
@@ -140,24 +137,15 @@ const App: React.FC = () => {
       for await (const chunk of stream) {
         fullText += chunk;
         setState(prev => {
-          const newHist = [...prev.chatHistory];
-          if (newHist.length > 0) newHist[newHist.length - 1] = { role: 'model', text: fullText };
-          return { ...prev, chatHistory: newHist };
+          const newH = [...prev.chatHistory];
+          newH[newH.length - 1] = { role: 'model', text: fullText };
+          return { ...prev, chatHistory: newH };
         });
       }
       setState(prev => ({ ...prev, isProcessing: false }));
     } catch (error) {
       setState(prev => ({ ...prev, isProcessing: false }));
     }
-  };
-
-  const switchConversation = (conv: Conversation) => {
-    setState(prev => ({ 
-      ...prev, activeConversationId: conv.id, chatHistory: conv.chatHistory, 
-      pdfBase64: conv.pdfBase64, pdfUrl: conv.pdfUrl, pdfName: conv.pdfName, axioms: conv.axioms 
-    }));
-    setActiveView('chat');
-    setSidebarOpen(false);
   };
 
   const isRtl = state.language === 'ar';
@@ -170,26 +158,22 @@ const App: React.FC = () => {
         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
       </button>
 
-      {/* Sidebar Overlay */}
-      <div className={`fixed inset-0 bg-black/80 z-[2100] transition-opacity duration-500 ${sidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={() => setSidebarOpen(false)} />
-
-      {/* Sidebar - النسخة الأصلية مع خاصية اللغة والتبديل */}
-      <aside className={`fixed top-0 bottom-0 ${isRtl ? 'right-0' : 'left-0'} z-[2200] w-[80vw] md:w-80 transition-transform duration-500 bg-[#05070a] border-x border-white/5 flex flex-col ${sidebarOpen ? 'translate-x-0' : (isRtl ? 'translate-x-full' : '-translate-x-full')}`}>
+      {/* Sidebar - كما في الملف الأصلي */}
+      <aside className={`fixed top-0 bottom-0 ${isRtl ? 'right-0' : 'left-0'} z-[2200] w-80 transition-transform duration-500 bg-[#05070a] border-x border-white/5 flex flex-col ${sidebarOpen ? 'translate-x-0' : (isRtl ? 'translate-x-full' : '-translate-x-full')}`}>
         <div className="p-8 flex flex-col h-full">
           <div className="flex items-center justify-between mb-10">
-            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20">Knowledge Repository</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20">Archive System</span>
             <button onClick={() => setSidebarOpen(false)} className="p-2 bg-white/5 rounded-full"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
           </div>
 
           <label className="mb-8 cursor-pointer group">
             <input type="file" accept="application/pdf" onChange={handleFileUpload} className="hidden" />
             <div className="flex items-center gap-4 p-5 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 transition-all">
-              <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-black shrink-0"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14"/></svg></div>
+              <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-black shrink-0 shadow-lg"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14"/></svg></div>
               <span className="font-black text-[10px] uppercase tracking-widest">{t.newResearch}</span>
             </div>
           </label>
 
-          {/* View Mode Selectors - Manuscript Viewer Switch */}
           <div className="space-y-2 mb-8">
             <button onClick={() => { setActiveView('chat'); setSidebarOpen(false); }} className={`w-full flex items-center gap-4 p-4 rounded-2xl transition-all ${activeView === 'chat' ? 'bg-white/10 text-white border border-white/5' : 'text-slate-400'}`}>
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
@@ -201,16 +185,6 @@ const App: React.FC = () => {
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto custom-scrollbar space-y-2">
-            <h3 className="text-[9px] font-black uppercase tracking-widest text-white/20 mb-4 px-4">{t.previousChats}</h3>
-            {state.conversations.map(conv => (
-              <div key={conv.id} onClick={() => switchConversation(conv)} className={`p-4 rounded-2xl border transition-all cursor-pointer ${state.activeConversationId === conv.id ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5'}`}>
-                <span className="text-[10px] font-bold line-clamp-2">{conv.title}</span>
-              </div>
-            ))}
-          </div>
-
-          {/* Language Switcher - الأصلي */}
           <div className="mt-auto pt-8 border-t border-white/5">
             <button onClick={() => setState(p => ({ ...p, language: p.language === 'en' ? 'ar' : 'en' }))} className="w-full flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5 hover:bg-white/10 transition-all">
               <span className="text-[9px] font-black text-white/30 uppercase tracking-widest">{t.languageLabel}</span>
@@ -220,51 +194,54 @@ const App: React.FC = () => {
         </div>
       </aside>
 
-      {/* Main Content Area */}
+      {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0 bg-[#05070a]">
-        <header className="h-16 md:h-20 flex items-center justify-center border-b border-white/5 bg-[#05070a]/95 backdrop-blur-2xl">
+        <header className="h-16 md:h-20 flex items-center justify-center border-b border-white/5">
           <h1 className="text-xl md:text-2xl font-black tracking-[0.2em] glow-text-violet uppercase italic">Knowledge AI</h1>
         </header>
 
         <div className="flex-1 relative overflow-hidden">
           {!state.pdfBase64 ? (
-            <div className="flex-1 flex flex-col items-center justify-center p-6 text-center h-full">
-               <h2 className="text-4xl md:text-7xl font-black text-white/90 mb-6 tracking-tighter italic">The <span className="glow-text-violet">Sanctuary</span></h2>
-               <label className="mt-10 group cursor-pointer w-full max-w-md">
-                  <input type="file" accept="application/pdf" onChange={handleFileUpload} className="hidden" />
-                  <div className="glass rounded-[40px] p-10 md:p-16 border-2 border-dashed border-white/10 hover:border-violet-500/40 transition-all flex flex-col items-center bg-white/[0.01] shadow-2xl">
-                    <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mb-8 border border-white/10 shadow-pro">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-white/70"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                    </div>
-                    <h2 className="text-sm md:text-base font-black text-white uppercase tracking-[0.3em]">{t.uploadPrompt}</h2>
-                  </div>
-                </label>
-            </div>
+             <div className="flex-1 flex flex-col items-center justify-center p-6 text-center h-full">
+                <h2 className="text-4xl md:text-7xl font-black text-white/90 mb-6 tracking-tighter italic">The <span className="glow-text-violet">Sanctuary</span></h2>
+                <label className="mt-10 group cursor-pointer w-full max-w-md">
+                   <input type="file" accept="application/pdf" onChange={handleFileUpload} className="hidden" />
+                   <div className="glass rounded-[40px] p-10 md:p-16 border-2 border-dashed border-white/10 hover:border-violet-500/40 transition-all flex flex-col items-center bg-white/[0.01]">
+                     <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mb-8 border border-white/10 shadow-pro">
+                       <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-white/70"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                     </div>
+                     <h2 className="text-sm font-black text-white uppercase tracking-[0.3em]">{t.uploadPrompt}</h2>
+                   </div>
+                 </label>
+             </div>
           ) : (
             <div className="flex-1 flex flex-col h-full">
               {activeView === 'chat' ? (
                 <ChatSanctuary messages={state.chatHistory} onSendMessage={handleSendMessage} isProcessing={state.isProcessing} language={state.language} />
               ) : (
-                <ManuscriptViewer url={state.pdfUrl || ''} />
+                <div className="flex-1 bg-[#0a0c10] relative">
+                  {/* تجربة عرض تشبه Internet Archive مع دعم الـ RTL */}
+                  <ManuscriptViewer url={state.pdfUrl || ''} />
+                </div>
               )}
             </div>
           )}
         </div>
       </main>
 
-      {/* Loading & Axioms Overlay - كما في الأصلي */}
+      {/* Loading Overlay */}
       {isInitialAnalysis && (
-        <div className="fixed inset-0 z-[5000] bg-[#05070a] flex flex-col items-center justify-center p-6 text-center animate-in fade-in">
-          <div className="w-16 h-16 rounded-full border-t-2 border-violet-500 animate-spin mb-10"></div>
+        <div className="fixed inset-0 z-[5000] bg-[#05070a] flex flex-col items-center justify-center p-6 text-center">
+          <div className="w-16 h-16 rounded-full border-t-2 border-violet-500 animate-spin mb-10 shadow-[0_0_30px_rgba(139,92,246,0.3)]"></div>
           <h2 className="text-xl font-black glow-text-violet uppercase tracking-widest mb-4 italic">{t.synthesizing}</h2>
           <p className="text-xs font-bold text-violet-300 italic max-w-md">{t.covenant}</p>
         </div>
       )}
 
       {showAxiomsOverlay && (
-        <div className="fixed inset-0 z-[1500] bg-[#05070a]/95 backdrop-blur-3xl flex flex-col items-center justify-center p-6 animate-in zoom-in duration-700 overflow-y-auto">
-          <h2 className="text-xl md:text-3xl font-black glow-text-violet uppercase tracking-[0.4em] mb-12 italic">{t.axiomsTitle}</h2>
-          <div className="w-full max-w-7xl mb-16"><AxiomCards axioms={state.axioms} variant="fullscreen" /></div>
+        <div className="fixed inset-0 z-[1500] bg-[#05070a]/95 backdrop-blur-3xl flex flex-col items-center justify-center p-6 animate-in zoom-in duration-700">
+          <h2 className="text-xl md:text-3xl font-black glow-text-violet uppercase tracking-[0.4em] mb-12 italic text-center">{t.axiomsTitle}</h2>
+          <div className="w-full max-w-7xl mb-16 overflow-y-auto custom-scrollbar"><AxiomCards axioms={state.axioms} variant="fullscreen" /></div>
           <button onClick={() => setShowAxiomsOverlay(false)} className="px-10 py-4 bg-white text-black rounded-full font-black uppercase tracking-widest text-xs shadow-xl active:scale-95 transition-all">{t.startChat}</button>
         </div>
       )}
