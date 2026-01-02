@@ -32,8 +32,6 @@ const App: React.FC = () => {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        // Optimization: Don't load all base64 data into memory at once if possible
-        // For now, we keep it but we should be careful with large histories
         setState(prev => ({ ...prev, conversations: parsed }));
       } catch (e) {
         console.error("Failed to load conversations", e);
@@ -43,12 +41,10 @@ const App: React.FC = () => {
 
   // Save conversations to localStorage whenever they change
   useEffect(() => {
-    // Optimization: Limit the number of stored conversations or their size
-    const storageData = JSON.stringify(state.conversations);
     try {
-      localStorage.setItem('sanctuary_conversations', storageData);
+      localStorage.setItem('sanctuary_conversations', JSON.stringify(state.conversations));
     } catch (e) {
-      console.warn("LocalStorage full, could not save all conversations");
+      console.warn("LocalStorage limit reached, some conversations might not be saved.");
     }
   }, [state.conversations]);
 
@@ -111,9 +107,9 @@ const App: React.FC = () => {
     const file = e.target.files?.[0];
     if (!file || file.type !== 'application/pdf') return;
 
-    // Check file size - Gemini inline limit is 20MB
-    if (file.size > 20 * 1024 * 1024) {
-      alert(state.language === 'ar' ? "الملف كبير جداً. الحد الأقصى هو 20 ميجابايت." : "File is too large. Maximum size is 20MB.");
+    // INCREASED LIMIT TO 50MB
+    if (file.size > 50 * 1024 * 1024) {
+      alert(state.language === 'ar' ? "الملف كبير جداً. الحد الأقصى هو 50 ميجابايت." : "File is too large. Maximum size is 50MB.");
       return;
     }
 
@@ -192,6 +188,7 @@ const App: React.FC = () => {
     }));
 
     try {
+      // Generate title if it's the first message
       if (state.chatHistory.length === 0 && state.activeConversationId) {
         generateConversationTitle(text, state.language).then(title => {
           setState(prev => ({
@@ -237,6 +234,7 @@ const App: React.FC = () => {
   const switchConversation = (conv: Conversation) => {
     if (state.pdfUrl) URL.revokeObjectURL(state.pdfUrl);
     
+    // Recreate blob URL from base64 if needed
     let blobUrl = conv.pdfUrl;
     if (conv.pdfBase64) {
       try {
@@ -294,7 +292,7 @@ const App: React.FC = () => {
   return (
     <div className={`flex h-screen w-full bg-[#05070a] text-slate-200 overflow-hidden ${isRtl ? 'flex-row-reverse' : ''}`}>
       
-      {/* Sidebar Toggle Button */}
+      {/* Sidebar Toggle Button - FIXED AND ALWAYS TOP AT Z-4000 */}
       <button 
         onClick={() => setSidebarOpen(true)}
         className={`fixed top-4 ${isRtl ? 'right-4' : 'left-4'} z-[4000] p-3 bg-white text-black hover:scale-110 rounded-2xl transition-all shadow-[0_10px_40px_rgba(255,255,255,0.4)] flex items-center justify-center active:scale-90 active:bg-violet-500 active:text-white`}
@@ -308,7 +306,7 @@ const App: React.FC = () => {
         <div className="fixed inset-0 z-[2000] bg-[#05070a] flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-500">
           <div className="absolute inset-0 bg-grid opacity-10"></div>
           <div className="w-16 h-16 md:w-24 md:h-24 rounded-full border-t-2 border-violet-500 animate-spin mb-10"></div>
-          <h2 className="text-2xl md:text-4xl font-black tracking-tighter mb-4 bg-gradient-to-b from-white to-white/40 bg-clip-text text-transparent uppercase italic">
+          <h2 className="text-xl md:text-2xl font-black glow-text-violet uppercase tracking-widest mb-4 italic">
             {t.synthesizing}
           </h2>
           <p className="text-slate-400 max-w-md italic font-serif leading-relaxed">
@@ -443,7 +441,7 @@ const App: React.FC = () => {
                     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
                   </div>
                   <span className="text-sm font-black uppercase tracking-widest mb-2">{t.uploadPrompt}</span>
-                  <span className="text-[10px] text-white/30 font-mono uppercase tracking-tighter">PDF Manuscripts Only • Max 20MB</span>
+                  <span className="text-[10px] text-white/30 font-mono uppercase tracking-tighter">PDF Manuscripts Only • Max 50MB</span>
                   <input type="file" className="hidden" accept="application/pdf" onChange={handleFileUpload} />
                 </label>
               </div>
