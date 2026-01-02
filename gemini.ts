@@ -10,7 +10,6 @@ export const getGeminiClient = () => {
 
 /**
  * Extracts axioms from the PDF.
- * This is called once when the file is uploaded.
  */
 export const extractAxioms = async (pdfBase64: string, language: 'en' | 'ar' = 'en'): Promise<Axiom[]> => {
   const ai = getGeminiClient();
@@ -60,7 +59,7 @@ export const extractAxioms = async (pdfBase64: string, language: 'en' | 'ar' = '
 /**
  * Streams the chat response.
  * OPTIMIZATION: We only attach the PDF to the FIRST message in the history.
- * This prevents memory bloat and crashes with large PDFs during long conversations.
+ * This is the key to handling 50MB+ files without crashing Render or the browser.
  */
 export async function* chatWithResearchStream(
   pdfBase64: string,
@@ -73,9 +72,10 @@ export async function* chatWithResearchStream(
   const contents = history.map((h, index) => {
     const parts: any[] = [{ text: h.text }];
     
-    // CRITICAL FIX: Only attach the PDF to the very first user message.
-    // Gemini's context window will remember the PDF content for subsequent turns.
-    // This saves massive amounts of memory and prevents Render/Browser crashes.
+    // CRITICAL MEMORY OPTIMIZATION:
+    // Only attach the PDF data to the very first user message.
+    // Gemini remembers the file content from the context, so repeating it
+    // in every message would multiply memory usage and cause crashes.
     if (index === 0 && h.role === 'user' && pdfBase64) {
       parts.unshift({
         inlineData: {
