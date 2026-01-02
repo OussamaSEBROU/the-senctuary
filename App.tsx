@@ -1,10 +1,10 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { Axiom, Message, ResearchState, Conversation } from './types';
-import { extractAxioms, chatWithResearchStream, generateEssenceTitle } from './services/gemini';
-import { AxiomCards } from './components/AxiomCards';
-import { ChatSanctuary } from './components/ChatSanctuary';
-import { ManuscriptViewer } from './components/ManuscriptViewer';
+import { extractAxioms, chatWithResearchStream, generateEssenceTitle } from './gemini';
+import { AxiomCards } from './AxiomCards';
+import { ChatSanctuary } from './ChatSanctuary';
+import { ManuscriptViewer } from './ManuscriptViewer';
 
 type ViewMode = 'chat' | 'pdf';
 
