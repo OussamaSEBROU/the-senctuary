@@ -1,19 +1,20 @@
 
-import * as GoogleGenerativeAI from "@google/generative-ai";
+import { GoogleGenAI } from "@google/generative-ai";
 import { Axiom } from "./types";
 import { SYSTEM_INSTRUCTION, getAxiomExtractionPrompt } from "./prompts";
 
-// تصحيح الاستيراد ليتوافق مع Vite/Rollup في بيئة الإنتاج
-const { GoogleGenAI } = GoogleGenerativeAI;
-
+// استخدام النموذج المطلوب من قبل المستخدم
 const MODEL_NAME = 'gemini-2.5-flash';
 
 export const getGeminiClient = () => {
-  const apiKey = import.meta.env.VITE_API_KEY || "";
+  // الأولوية لـ VITE_API_KEY (Vite) ثم API_KEY (Render/Process)
+  const apiKey = import.meta.env.VITE_API_KEY || (typeof process !== 'undefined' ? process.env.API_KEY : "");
+  
   if (!apiKey) {
-    console.error("Gemini API Key is missing! Please set VITE_API_KEY in your environment.");
+    console.warn("Gemini API Key is missing! Ensure VITE_API_KEY is set in your environment.");
   }
-  return new GoogleGenAI(apiKey);
+  
+  return new GoogleGenAI(apiKey as string);
 };
 
 export const extractAxioms = async (pdfBase64: string, language: 'en' | 'ar' = 'en'): Promise<Axiom[]> => {
@@ -39,6 +40,7 @@ export const extractAxioms = async (pdfBase64: string, language: 'en' | 'ar' = '
     const response = await result.response;
     const text = response.text();
     
+    // تنظيف النص المستخرج لضمان الحصول على JSON صالح
     const jsonMatch = text.match(/\[[\s\S]*\]/);
     const jsonText = jsonMatch ? jsonMatch[0] : text;
     
@@ -62,11 +64,13 @@ export async function* chatWithResearchStream(
       systemInstruction: SYSTEM_INSTRUCTION,
     });
 
+    // تحويل التاريخ إلى التنسيق المطلوب لـ SDK
     const contents = history.map((h) => ({
       role: h.role === 'user' ? 'user' : 'model',
       parts: [{ text: h.text }]
     }));
 
+    // إضافة الملف والرسالة الحالية
     const currentParts: any[] = [
       {
         inlineData: {
