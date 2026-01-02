@@ -26,7 +26,7 @@ const App: React.FC = () => {
   const [isInitialAnalysis, setIsInitialAnalysis] = useState(false);
   const [showAxiomsOverlay, setShowAxiomsOverlay] = useState(false);
 
-  // Load conversations
+  // تحميل المحادثات من التخزين المحلي
   useEffect(() => {
     const saved = localStorage.getItem('sanctuary_conversations');
     if (saved) {
@@ -39,13 +39,9 @@ const App: React.FC = () => {
     }
   }, []);
 
-  // Save conversations with local storage protection
+  // حفظ المحادثات
   useEffect(() => {
-    try {
-      localStorage.setItem('sanctuary_conversations', JSON.stringify(state.conversations));
-    } catch (e) {
-      console.warn("Storage limit reached");
-    }
+    localStorage.setItem('sanctuary_conversations', JSON.stringify(state.conversations));
   }, [state.conversations]);
 
   useEffect(() => {
@@ -60,36 +56,32 @@ const App: React.FC = () => {
       dialogue: "Research Workspace",
       fullPdf: "Manuscript Viewer",
       axiomsHeader: "Axiomatic Insights",
-      activeDoc: "Active Manuscript",
       uploadPrompt: "Upload manuscript",
       synthesizing: "Neural Synthesis in Progress...",
       ready: "Sanctuary Ready",
       processing: "Processing...",
-      openInNewTab: "View Full Screen",
       covenant: "The Sanctuary Covenant: Direct reading and personal comprehension are the only paths to wisdom.",
       startChat: "Enter the Sanctuary",
       axiomsTitle: "Axiomatic Wisdom Extracted",
       previousChats: "Previous Conversations",
       noChats: "No previous chats",
-      deleteChat: "Delete"
+      languageLabel: "Language"
     },
     ar: {
       newResearch: "بحث جديد",
       dialogue: "مساحة البحث",
       fullPdf: "مستعرض المخطوطات",
       axiomsHeader: "الرؤى البديهية",
-      activeDoc: "المخطوطة النشطة",
       uploadPrompt: "رفع المخطوطة",
       synthesizing: "جاري التوليف العصبي...",
       ready: "الملاذ جاهز",
       processing: "معالجة...",
-      openInNewTab: "فتح المخطوطة في نافذة جديدة",
       covenant: "عهد الملاذ: القراءة المباشرة والفهم الشخصي هما المساران الوحيدان للحكمة الحقيقية.",
       startChat: "دخول الملاذ المعرفي",
       axiomsTitle: "تم استخراج الحكمة البديهية",
       previousChats: "المحادثات السابقة",
       noChats: "لا توجد محادثات سابقة",
-      deleteChat: "حذف"
+      languageLabel: "اللغة"
     }
   }), []);
 
@@ -149,7 +141,7 @@ const App: React.FC = () => {
         fullText += chunk;
         setState(prev => {
           const newHist = [...prev.chatHistory];
-          newHist[newHist.length - 1] = { role: 'model', text: fullText };
+          if (newHist.length > 0) newHist[newHist.length - 1] = { role: 'model', text: fullText };
           return { ...prev, chatHistory: newHist };
         });
       }
@@ -160,7 +152,6 @@ const App: React.FC = () => {
   };
 
   const switchConversation = (conv: Conversation) => {
-    if (state.pdfUrl) URL.revokeObjectURL(state.pdfUrl);
     setState(prev => ({ 
       ...prev, activeConversationId: conv.id, chatHistory: conv.chatHistory, 
       pdfBase64: conv.pdfBase64, pdfUrl: conv.pdfUrl, pdfName: conv.pdfName, axioms: conv.axioms 
@@ -179,22 +170,14 @@ const App: React.FC = () => {
         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
       </button>
 
-      {/* Loading Overlay */}
-      {isInitialAnalysis && (
-        <div className="fixed inset-0 z-[2000] bg-[#05070a] flex flex-col items-center justify-center p-6 text-center">
-          <div className="w-16 h-16 rounded-full border-t-2 border-violet-500 animate-spin mb-10"></div>
-          <h2 className="text-xl font-black glow-text-violet uppercase tracking-widest mb-4 italic">{t.synthesizing}</h2>
-          <div className="glass bg-violet-600/5 p-6 rounded-2xl border border-violet-500/20 max-w-md">
-            <p className="text-xs font-bold text-violet-300 italic">{t.covenant}</p>
-          </div>
-        </div>
-      )}
+      {/* Sidebar Overlay */}
+      <div className={`fixed inset-0 bg-black/80 z-[2100] transition-opacity duration-500 ${sidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} onClick={() => setSidebarOpen(false)} />
 
-      {/* Sidebar - BACK TO ORIGINAL WITH MANUSCRIPT VIEWER BUTTONS */}
-      <aside className={`fixed top-0 bottom-0 ${isRtl ? 'right-0' : 'left-0'} z-[2200] w-[80vw] md:w-80 transition-transform duration-500 bg-[#05070a] border-r border-white/5 flex flex-col ${sidebarOpen ? 'translate-x-0' : (isRtl ? 'translate-x-full' : '-translate-x-full')}`}>
+      {/* Sidebar - النسخة الأصلية مع خاصية اللغة والتبديل */}
+      <aside className={`fixed top-0 bottom-0 ${isRtl ? 'right-0' : 'left-0'} z-[2200] w-[80vw] md:w-80 transition-transform duration-500 bg-[#05070a] border-x border-white/5 flex flex-col ${sidebarOpen ? 'translate-x-0' : (isRtl ? 'translate-x-full' : '-translate-x-full')}`}>
         <div className="p-8 flex flex-col h-full">
           <div className="flex items-center justify-between mb-10">
-            <span className="text-[10px] font-black text-white/20 uppercase tracking-widest">Repository</span>
+            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20">Knowledge Repository</span>
             <button onClick={() => setSidebarOpen(false)} className="p-2 bg-white/5 rounded-full"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button>
           </div>
 
@@ -206,51 +189,59 @@ const App: React.FC = () => {
             </div>
           </label>
 
-          {/* VIEW SELECTOR BUTTONS - RESTORED */}
+          {/* View Mode Selectors - Manuscript Viewer Switch */}
           <div className="space-y-2 mb-8">
-            <button onClick={() => { setActiveView('chat'); setSidebarOpen(false); }} className={`w-full flex items-center gap-4 p-4 rounded-2xl transition-all ${activeView === 'chat' ? 'bg-white/10 text-white' : 'text-slate-400'}`}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+            <button onClick={() => { setActiveView('chat'); setSidebarOpen(false); }} className={`w-full flex items-center gap-4 p-4 rounded-2xl transition-all ${activeView === 'chat' ? 'bg-white/10 text-white border border-white/5' : 'text-slate-400'}`}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
               <span className="text-[10px] font-black uppercase tracking-widest">{t.dialogue}</span>
             </button>
-            <button onClick={() => { setActiveView('pdf'); setSidebarOpen(false); }} disabled={!state.pdfUrl} className={`w-full flex items-center gap-4 p-4 rounded-2xl transition-all ${activeView === 'pdf' ? 'bg-white/10 text-white' : 'text-slate-400 disabled:opacity-20'}`}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/></svg>
+            <button onClick={() => { setActiveView('pdf'); setSidebarOpen(false); }} disabled={!state.pdfUrl} className={`w-full flex items-center gap-4 p-4 rounded-2xl transition-all ${activeView === 'pdf' ? 'bg-white/10 text-white border border-white/5' : 'text-slate-400 disabled:opacity-20'}`}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/></svg>
               <span className="text-[10px] font-black uppercase tracking-widest">{t.fullPdf}</span>
             </button>
           </div>
 
           <div className="flex-1 overflow-y-auto custom-scrollbar space-y-2">
-            <h3 className="text-[9px] font-black uppercase tracking-widest text-white/20 mb-4">{t.previousChats}</h3>
+            <h3 className="text-[9px] font-black uppercase tracking-widest text-white/20 mb-4 px-4">{t.previousChats}</h3>
             {state.conversations.map(conv => (
               <div key={conv.id} onClick={() => switchConversation(conv)} className={`p-4 rounded-2xl border transition-all cursor-pointer ${state.activeConversationId === conv.id ? 'bg-white/10 border-white/10' : 'border-transparent hover:bg-white/5'}`}>
                 <span className="text-[10px] font-bold line-clamp-2">{conv.title}</span>
               </div>
             ))}
           </div>
+
+          {/* Language Switcher - الأصلي */}
+          <div className="mt-auto pt-8 border-t border-white/5">
+            <button onClick={() => setState(p => ({ ...p, language: p.language === 'en' ? 'ar' : 'en' }))} className="w-full flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5 hover:bg-white/10 transition-all">
+              <span className="text-[9px] font-black text-white/30 uppercase tracking-widest">{t.languageLabel}</span>
+              <span className="text-[10px] font-black text-white">{state.language.toUpperCase()}</span>
+            </button>
+          </div>
         </div>
       </aside>
 
-      {/* Main Content */}
-      <main className="flex-1 flex flex-col min-w-0">
-        <header className="h-16 md:h-20 flex items-center justify-center border-b border-white/5 bg-[#05070a]">
-          <h1 className="text-xl font-black tracking-[0.2em] glow-text-violet uppercase italic">Knowledge AI</h1>
+      {/* Main Content Area */}
+      <main className="flex-1 flex flex-col min-w-0 bg-[#05070a]">
+        <header className="h-16 md:h-20 flex items-center justify-center border-b border-white/5 bg-[#05070a]/95 backdrop-blur-2xl">
+          <h1 className="text-xl md:text-2xl font-black tracking-[0.2em] glow-text-violet uppercase italic">Knowledge AI</h1>
         </header>
 
-        <div className="flex-1 relative flex flex-col">
+        <div className="flex-1 relative overflow-hidden">
           {!state.pdfBase64 ? (
-            <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
+            <div className="flex-1 flex flex-col items-center justify-center p-6 text-center h-full">
                <h2 className="text-4xl md:text-7xl font-black text-white/90 mb-6 tracking-tighter italic">The <span className="glow-text-violet">Sanctuary</span></h2>
                <label className="mt-10 group cursor-pointer w-full max-w-md">
                   <input type="file" accept="application/pdf" onChange={handleFileUpload} className="hidden" />
-                  <div className="glass rounded-[40px] p-10 md:p-16 border-2 border-dashed border-white/10 hover:border-violet-500/40 transition-all flex flex-col items-center bg-white/[0.01]">
+                  <div className="glass rounded-[40px] p-10 md:p-16 border-2 border-dashed border-white/10 hover:border-violet-500/40 transition-all flex flex-col items-center bg-white/[0.01] shadow-2xl">
                     <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mb-8 border border-white/10 shadow-pro">
                       <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-white/70"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                     </div>
-                    <h2 className="text-sm font-black text-white uppercase tracking-[0.3em]">{t.uploadPrompt}</h2>
+                    <h2 className="text-sm md:text-base font-black text-white uppercase tracking-[0.3em]">{t.uploadPrompt}</h2>
                   </div>
                 </label>
             </div>
           ) : (
-            <div className="flex-1 flex flex-col overflow-hidden">
+            <div className="flex-1 flex flex-col h-full">
               {activeView === 'chat' ? (
                 <ChatSanctuary messages={state.chatHistory} onSendMessage={handleSendMessage} isProcessing={state.isProcessing} language={state.language} />
               ) : (
@@ -261,11 +252,19 @@ const App: React.FC = () => {
         </div>
       </main>
 
-      {/* Axioms Overlay */}
+      {/* Loading & Axioms Overlay - كما في الأصلي */}
+      {isInitialAnalysis && (
+        <div className="fixed inset-0 z-[5000] bg-[#05070a] flex flex-col items-center justify-center p-6 text-center animate-in fade-in">
+          <div className="w-16 h-16 rounded-full border-t-2 border-violet-500 animate-spin mb-10"></div>
+          <h2 className="text-xl font-black glow-text-violet uppercase tracking-widest mb-4 italic">{t.synthesizing}</h2>
+          <p className="text-xs font-bold text-violet-300 italic max-w-md">{t.covenant}</p>
+        </div>
+      )}
+
       {showAxiomsOverlay && (
-        <div className="fixed inset-0 z-[1500] bg-[#05070a]/95 backdrop-blur-3xl flex flex-col items-center justify-center p-6 animate-in zoom-in duration-700">
+        <div className="fixed inset-0 z-[1500] bg-[#05070a]/95 backdrop-blur-3xl flex flex-col items-center justify-center p-6 animate-in zoom-in duration-700 overflow-y-auto">
           <h2 className="text-xl md:text-3xl font-black glow-text-violet uppercase tracking-[0.4em] mb-12 italic">{t.axiomsTitle}</h2>
-          <div className="w-full max-w-7xl mb-16 overflow-y-auto"><AxiomCards axioms={state.axioms} variant="fullscreen" /></div>
+          <div className="w-full max-w-7xl mb-16"><AxiomCards axioms={state.axioms} variant="fullscreen" /></div>
           <button onClick={() => setShowAxiomsOverlay(false)} className="px-10 py-4 bg-white text-black rounded-full font-black uppercase tracking-widest text-xs shadow-xl active:scale-95 transition-all">{t.startChat}</button>
         </div>
       )}
