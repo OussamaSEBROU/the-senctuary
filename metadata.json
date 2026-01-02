@@ -1,8 +1,0 @@
-{
-  "name": "Knowledge AI - Sanctuary",
-  "description": "A high-performance research sanctuary engineered for the deep extraction of axiomatic wisdom from PDF documents, utilizing the power of Gemini AI.",
-  "requestFramePermissions": [
-    "camera",
-    "microphone"
-  ]
-}
