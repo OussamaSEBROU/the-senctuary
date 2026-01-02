@@ -3,7 +3,7 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { Axiom } from "./types";
 import { SYSTEM_INSTRUCTION, getAxiomExtractionPrompt } from "./prompts";
 
-const MODEL_NAME = 'gemini-2.5-flash';
+const MODEL_NAME = 'gemini-3-pro-preview';
 
 export const getGeminiClient = () => {
   return new GoogleGenAI({ apiKey: process.env.API_KEY });
