@@ -1,9 +1,12 @@
 
-import { GoogleGenAI } from "@google/generative-ai";
+import * as GoogleGenerativeAI from "@google/generative-ai";
 import { Axiom } from "./types";
 import { SYSTEM_INSTRUCTION, getAxiomExtractionPrompt } from "./prompts";
 
-const MODEL_NAME = 'gemini-2.5-flash'; // تم الالتزام بالنموذج الذي طلبته
+// تصحيح الاستيراد ليتوافق مع Vite/Rollup في بيئة الإنتاج
+const { GoogleGenAI } = GoogleGenerativeAI;
+
+const MODEL_NAME = 'gemini-2.5-flash';
 
 export const getGeminiClient = () => {
   const apiKey = import.meta.env.VITE_API_KEY || "";
