@@ -44,6 +44,7 @@ const App: React.FC = () => {
     try {
       localStorage.setItem('sanctuary_conversations', JSON.stringify(state.conversations));
     } catch (e) {
+      // تم إضافة هذا التنبيه من الملف الثاني للتعامل مع تجاوز حجم الذاكرة المحلية
       console.warn("LocalStorage limit reached, some conversations might not be saved.");
     }
   }, [state.conversations]);
@@ -103,11 +104,12 @@ const App: React.FC = () => {
 
   const t = labels[state.language];
 
+  // دالة رفع الملف المحدثة بحد 50 ميجابايت وتعامل أكثر أماناً
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || file.type !== 'application/pdf') return;
 
-    // INCREASED LIMIT TO 50MB
+    // تم تعديل الحد هنا ليصبح 50 ميجابايت (50 * 1024 * 1024)
     if (file.size > 50 * 1024 * 1024) {
       alert(state.language === 'ar' ? "الملف كبير جداً. الحد الأقصى هو 50 ميجابايت." : "File is too large. Maximum size is 50MB.");
       return;
@@ -188,7 +190,6 @@ const App: React.FC = () => {
     }));
 
     try {
-      // Generate title if it's the first message
       if (state.chatHistory.length === 0 && state.activeConversationId) {
         generateConversationTitle(text, state.language).then(title => {
           setState(prev => ({
@@ -234,7 +235,7 @@ const App: React.FC = () => {
   const switchConversation = (conv: Conversation) => {
     if (state.pdfUrl) URL.revokeObjectURL(state.pdfUrl);
     
-    // Recreate blob URL from base64 if needed
+    // تم جلب تحسين معالجة الـ Base64 للملفات الكبيرة من الملف الثاني
     let blobUrl = conv.pdfUrl;
     if (conv.pdfBase64) {
       try {
@@ -441,6 +442,7 @@ const App: React.FC = () => {
                     <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
                   </div>
                   <span className="text-sm font-black uppercase tracking-widest mb-2">{t.uploadPrompt}</span>
+                  {/* تم تحديث النص الإرشادي هنا ليظهر 50MB */}
                   <span className="text-[10px] text-white/30 font-mono uppercase tracking-tighter">PDF Manuscripts Only • Max 50MB</span>
                   <input type="file" className="hidden" accept="application/pdf" onChange={handleFileUpload} />
                 </label>
@@ -463,7 +465,6 @@ const App: React.FC = () => {
                     />
                   </div>
                   
-                  {/* Desktop Axioms Sidebar */}
                   <div className="hidden xl:block w-96 border-l border-white/5 bg-black/20 overflow-y-auto custom-scrollbar">
                     <div className="p-8">
                       <div className="flex items-center gap-3 mb-8">
@@ -499,7 +500,6 @@ const App: React.FC = () => {
           )}
         </div>
 
-        {/* Axioms Overlay (Initial Analysis) */}
         {showAxiomsOverlay && (
           <div className="fixed inset-0 z-[3000] bg-[#05070a]/95 backdrop-blur-2xl flex items-center justify-center p-6 animate-in zoom-in duration-500">
             <div className="max-w-4xl w-full max-h-[80vh] flex flex-col">
@@ -532,4 +532,3 @@ const App: React.FC = () => {
 };
 
 export default App;
-
